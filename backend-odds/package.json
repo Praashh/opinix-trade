@@ -4,8 +4,7 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc",
-    "start": "node dist/index.js",
-    "postinstall": "prisma generate"
+    "dev": "tsc && node dist/index.js"
   },
   "keywords": [],
   "author": "",
