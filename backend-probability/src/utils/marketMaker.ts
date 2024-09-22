@@ -47,6 +47,13 @@ export const processOrder = (
   );
 
   if (side === "yes") {
+    if (price < orderBook.topYesPrice) {
+      return { success: false, message: "Invalid request: Price is lower than the top price for Yes." };
+    }
+    if (topYes && topYes.quantity < quantity) {
+      return { success: false, message: "Invalid request: Not enough quantity available." };
+    }
+
     if (topYes && topNo && topYes.quantity >= quantity) {
       topYes.quantity -= quantity;
       topNo.quantity += quantity;
@@ -54,8 +61,19 @@ export const processOrder = (
         orderBook.topYesPrice += 0.5;
         orderBook.topNoPrice -= 0.5;
       }
+      return { success: true }; 
+    }else{
+      return { success: false, message: "Not enough quantity available." };
     }
   } else {
+
+    if (price < orderBook.topNoPrice) {
+      return { success: false, message: "Invalid request: Price is lower than the top price for No." };
+    }
+    if (topNo && topNo.quantity < quantity) {
+      return { success: false, message: "Invalid request: Not enough quantity available." };
+    }
+
     if (topNo && topYes && topNo.quantity >= quantity) {
       topNo.quantity -= quantity;
       topYes.quantity += quantity;
@@ -63,7 +81,11 @@ export const processOrder = (
         orderBook.topNoPrice -= 0.5;
         orderBook.topYesPrice += 0.5;
       }
+      return { success: true };
+    }else{
+      return { success: false, message: "Not enough quantity available." };
     }
+    
   }
 
   broadcastOrderBook(orderBook);
@@ -85,16 +107,17 @@ const broadcastOrderBook = (orderBook: OrderBook) => {
     probability,
   });
 };
+
 setInterval(() => {
   orderBook.yes.forEach((order) => {
-    const change = Math.floor(Math.random() * 11) - 5;
+    const change = Math.floor(Math.random() * 5) - 2;
     order.quantity = Math.max(0, order.quantity + change);
   });
 
   orderBook.no.forEach((order) => {
-    const change = Math.floor(Math.random() * 11) - 5;
+    const change = Math.floor(Math.random() * 5) - 2;
     order.quantity = Math.max(0, order.quantity + change);
   });
 
   broadcastOrderBook(orderBook);
-}, 10000);
+}, 20000);

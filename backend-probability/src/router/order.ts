@@ -21,8 +21,13 @@ router.post("/order", (req, res) => {
     return res.status(400).json({ error: "Invalid order data" });
   }
 
-  processOrder(side, quantity, price, orderBook);
-  res.json({ message: "Order processed" });
+  const result = processOrder(side, quantity, price, orderBook);
+
+  if (!result.success) {
+    return res.status(400).json({ error: result.message });
+  }
+
+  res.json({ message: "Order processed successfully." });
 });
 
 export default router;
