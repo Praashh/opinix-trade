@@ -1,21 +1,37 @@
-import http from 'http';
-import WebSocket from 'ws';
-import { calculateProbabilty, marketMakerOrders, orderbook } from '../utils/marketMaker';
+import WebSocket from "ws";
+import { Server } from "http";
+import { calculateProbabilty, orderBook } from "../utils/marketMaker";
 
-export function setupwebsocket(server : http.Server){
-   const wss = new WebSocket.Server({server});
+let clients: WebSocket[] = [];
 
-   wss.on('connection',(ws:WebSocket)=>{
-    console.log("client connected")
+export const setupwebsocket = (server: Server) => {
+  const wss = new WebSocket.Server({ server });
 
-    const intialState = JSON.stringify({
-        orderbook,
-        probabilites : calculateProbabilty()
-    })
-    ws.send(intialState)
+  wss.on("connection", (ws: WebSocket) => {
+    clients.push(ws);
+    console.log("New client connected!");
 
-    
-   })
-   marketMakerOrders(wss);
-   return wss
-}
+    ws.send(
+      JSON.stringify({
+        orderBook,
+        probability: calculateProbabilty(orderBook),
+      })
+    );
+    ws.on("close", () => {
+      clients = clients.filter((client) => client !== ws);
+      console.log("Client disconnected.");
+    });
+  });
+
+  return wss;
+};
+
+export const WebsocketServer = {
+  broadcast: (data: any) => {
+    clients.forEach((client) => {
+      if (client.readyState === WebSocket.OPEN) {
+        client.send(JSON.stringify(data));
+      }
+    });
+  },
+};
