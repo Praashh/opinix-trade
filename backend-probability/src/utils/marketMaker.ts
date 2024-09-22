@@ -1,5 +1,4 @@
-import { WebsocketServer } from "..";
-
+import { WebsocketServer } from "../router/websockets";
 
 interface Order {
   price: number;
@@ -34,7 +33,7 @@ const initializeOrderBook = (): OrderBook => {
 };
 export let orderBook = initializeOrderBook();
 
-const processOrder = (
+export const processOrder = (
   side: "yes" | "no",
   quantity: number,
   price: number,
@@ -69,7 +68,7 @@ const processOrder = (
 
   broadcastOrderBook(orderBook);
 };
-const calculateProbabilty = (orderBook: OrderBook) => {
+export const calculateProbabilty = (orderBook: OrderBook) => {
   const yesProb = (orderBook.topYesPrice / 10) * 100;
   const noProb = 100 - yesProb;
 
