@@ -33,6 +33,9 @@ const initializeOrderBook = (): OrderBook => {
 };
 export let orderBook = initializeOrderBook();
 
+
+
+
 export const processOrder = (
   side: "yes" | "no",
   quantity: number,
@@ -56,11 +59,11 @@ export const processOrder = (
 
     if (topYes && topNo && topYes.quantity >= quantity) {
       topYes.quantity -= quantity;
-      topNo.quantity += quantity;
       if (topYes.quantity === 0) {
         orderBook.topYesPrice += 0.5;
         orderBook.topNoPrice -= 0.5;
       }
+      broadcastOrderBook(orderBook);
       return { success: true }; 
     }else{
       return { success: false, message: "Not enough quantity available." };
@@ -76,11 +79,12 @@ export const processOrder = (
 
     if (topNo && topYes && topNo.quantity >= quantity) {
       topNo.quantity -= quantity;
-      topYes.quantity += quantity;
+
       if (topNo.quantity === 0) {
-        orderBook.topNoPrice -= 0.5;
-        orderBook.topYesPrice += 0.5;
+        orderBook.topNoPrice += 0.5;
+        orderBook.topYesPrice -= 0.5;
       }
+      broadcastOrderBook(orderBook);
       return { success: true };
     }else{
       return { success: false, message: "Not enough quantity available." };
@@ -88,7 +92,7 @@ export const processOrder = (
     
   }
 
-  broadcastOrderBook(orderBook);
+  
 };
 export const calculateProbabilty = (orderBook: OrderBook) => {
   const yesProb = (orderBook.topYesPrice / 10) * 100;
