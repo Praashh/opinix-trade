@@ -85,3 +85,16 @@ const broadcastOrderBook = (orderBook: OrderBook) => {
     probability,
   });
 };
+setInterval(() => {
+  orderBook.yes.forEach((order) => {
+    const change = Math.floor(Math.random() * 11) - 5;
+    order.quantity = Math.max(0, order.quantity + change);
+  });
+
+  orderBook.no.forEach((order) => {
+    const change = Math.floor(Math.random() * 11) - 5;
+    order.quantity = Math.max(0, order.quantity + change);
+  });
+
+  broadcastOrderBook(orderBook);
+}, 10000);
