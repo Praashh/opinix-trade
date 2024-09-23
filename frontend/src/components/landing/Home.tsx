@@ -3,7 +3,7 @@ import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { eventData } from '@/lib/event-data';
-
+// @ts-ignore
 const client = new W3CWebSocket('http://localhost:8080');
 
 const EventCard = ({ event }:any) => (
