@@ -15,7 +15,26 @@ export class Orderbook {
         this.buyOrders = new AVLTree<Order[]>();
         this.sellOrders = new AVLTree<Order[]>();
     }
-
+    initiateEvent(){
+        //  adding buy
+        const buyOrder = {
+            id: `buy1`,
+            quantity: 10,
+            price: 5,
+            timeStamp: Date.now()
+        }
+            this.buyOrders.insert(buyOrder.price, [buyOrder]);
+        //  adding sell
+        const sellOrder = {
+            id: `sell1`,
+            quantity: 10,
+            price: 5,
+            timeStamp: Date.now()
+        };
+        this.sellOrders.insert(sellOrder.price, [sellOrder]);
+        
+        return {message: "Market Initiated", yes:{buyOrder}, no:{sellOrder}};
+    }
     addBuyOrder(order: Order): void {
         const existingOrders = this.buyOrders.find(order.price);
         if (existingOrders) {
