@@ -14,7 +14,9 @@ import { useState, useEffect } from "react";
 import LineChart from "../ui/line-chart";
 
 const OrderBook = () => {
+  //@ts-ignore
   const [yesPrice, setYesPrice] = useState(5);
+  //@ts-ignore
   const [noPrice, setNoPrice] = useState(5);
 
   const [toggle, setToggle] = useState(true); 
@@ -33,7 +35,7 @@ const OrderBook = () => {
   ];
   const data_yes = [1, 5, 3, 6, 2, 4, 7, 5, 8, 6]; 
   const data_no = [2, 5, 4, 2, 1, 3, 6, 2, 3, 5]; 
-
+  // @ts-ignore
   const [socket, setSocket] = useState<null | WebSocket>(null)
   const [latestMessage, setLatestMessage] = useState<string | null>(null)
 
