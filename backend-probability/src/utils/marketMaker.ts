@@ -10,8 +10,17 @@ type OrderBook = {
   topYesPrice: number;
   topNoPrice: number;
 };
+interface UserPortfolio {
+  side: "yes" | "no" | null;
+  initialPrice: number | null;
+  initialQuantity: number | null;
+}
 
-let userOrder : {side : "yes"|"no"; price : number ; quantity : number;} | null = null
+let userPortfolio: UserPortfolio = {
+  side: null,
+  initialPrice: null,
+  initialQuantity: null,
+};
 
 const initializeOrderBook = (): OrderBook => {
   const orderBook: OrderBook = {
@@ -50,51 +59,69 @@ export const processOrder = (
 
   if (side === "yes") {
     if (price < orderBook.topYesPrice) {
-      return { success: false, message: "Invalid request: Price is lower than the top price for Yes." };
+      return {
+        success: false,
+        message: "Invalid request: Price is lower than the top price for Yes.",
+      };
     }
     if (topYes && topYes.quantity < quantity) {
-      return { success: false, message: "Invalid request: Not enough quantity available." };
+      return {
+        success: false,
+        message: "Invalid request: Not enough quantity available.",
+      };
+    }
+    if (!userPortfolio.initialPrice && !userPortfolio.side) {
+      userPortfolio.side = "yes";
+      userPortfolio.initialPrice = orderBook.topYesPrice;
+      userPortfolio.initialQuantity = quantity;
     }
 
     if (topYes && topNo && topYes.quantity >= quantity) {
       topYes.quantity -= quantity;
-      topNo.quantity += quantity;
+
       if (topYes.quantity === 0) {
         orderBook.topYesPrice += 0.5;
         orderBook.topNoPrice -= 0.5;
       }
-      userOrder = { side, price, quantity };
+
       broadcastOrderBook(orderBook);
-      return { success: true }; 
-    }else{
+      return { success: true };
+    } else {
       return { success: false, message: "Not enough quantity available." };
     }
   } else {
-
     if (price < orderBook.topNoPrice) {
-      return { success: false, message: "Invalid request: Price is lower than the top price for No." };
+      return {
+        success: false,
+        message: "Invalid request: Price is lower than the top price for No.",
+      };
     }
     if (topNo && topNo.quantity < quantity) {
-      return { success: false, message: "Invalid request: Not enough quantity available." };
+      return {
+        success: false,
+        message: "Invalid request: Not enough quantity available.",
+      };
+    }
+    if (!userPortfolio.initialPrice && !userPortfolio.side) {
+      userPortfolio.side = "no";
+      userPortfolio.initialPrice = orderBook.topNoPrice;
+      userPortfolio.initialQuantity = quantity;
     }
 
     if (topNo && topYes && topNo.quantity >= quantity) {
       topNo.quantity -= quantity;
-      topYes.quantity += quantity;
+
       if (topNo.quantity === 0) {
-        orderBook.topNoPrice -= 0.5;
-        orderBook.topYesPrice += 0.5;
+        orderBook.topNoPrice += 0.5;
+        orderBook.topYesPrice -= 0.5;
       }
-      userOrder = { side, price, quantity };
+
       broadcastOrderBook(orderBook);
       return { success: true };
-    }else{
+    } else {
       return { success: false, message: "Not enough quantity available." };
     }
-    
   }
-
-  broadcastOrderBook(orderBook);
 };
 export const calculateProbabilty = (orderBook: OrderBook) => {
   const yesProb = (orderBook.topYesPrice / 10) * 100;
@@ -114,7 +141,7 @@ const broadcastOrderBook = (orderBook: OrderBook) => {
   });
 };
 
-/*setInterval(() => {
+setInterval(() => {
   orderBook.yes.forEach((order) => {
     const change = Math.floor(Math.random() * 5) - 2;
     order.quantity = Math.max(0, order.quantity + change);
@@ -127,20 +154,25 @@ const broadcastOrderBook = (orderBook: OrderBook) => {
 
   broadcastOrderBook(orderBook);
 }, 20000);
-*/
 
-export const getPortfolio = ()=>{
-  if(!userOrder){
+
+export const getPortfolio = () => {
+  if (!userPortfolio.side || userPortfolio.initialPrice === null) {
     return { success: false, message: "No orders placed yet." };
   }
-  const currentPrice = userOrder.side === "yes" ? orderBook.topYesPrice : orderBook.topNoPrice;
-  const gainLoss = (currentPrice - userOrder.price) * userOrder.quantity;
+
+  const currentPrice =
+    userPortfolio.side === "yes" ? orderBook.topYesPrice : orderBook.topNoPrice;
+  const gainLoss =
+    (currentPrice - userPortfolio.initialPrice) *
+    userPortfolio.initialQuantity!;
+
   return {
     success: true,
-    side: userOrder.side,
-    initialPrice: userOrder.price,
+    side: userPortfolio.side,
+    initialPrice: userPortfolio.initialPrice,
     currentPrice,
-    quantity: userOrder.quantity,
-    gainLoss: gainLoss.toFixed(2), 
+    quantity: userPortfolio.initialQuantity,
+    gainLoss: gainLoss.toFixed(2),
   };
-}
+};
