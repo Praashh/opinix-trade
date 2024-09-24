@@ -44,6 +44,9 @@ const initializeOrderBook = (): OrderBook => {
 };
 export let orderBook = initializeOrderBook();
 
+
+
+
 export const processOrder = (
   side: "yes" | "no",
   quantity: number,
@@ -85,9 +88,15 @@ export const processOrder = (
         broadcastPortfolio()
       }
 
+
       broadcastOrderBook(orderBook);
       return { success: true };
     } else {
+
+      broadcastOrderBook(orderBook);
+      return { success: true }; 
+    }else{
+
       return { success: false, message: "Not enough quantity available." };
     }
   } else {
@@ -115,7 +124,11 @@ export const processOrder = (
       if (topNo.quantity === 0) {
         orderBook.topNoPrice += 0.5;
         orderBook.topYesPrice -= 0.5;
+
         broadcastPortfolio()
+      }
+
+
       }
 
       broadcastOrderBook(orderBook);
@@ -124,6 +137,11 @@ export const processOrder = (
       return { success: false, message: "Not enough quantity available." };
     }
   }
+
+
+
+  
+
 };
 export const calculateProbabilty = (orderBook: OrderBook) => {
   const yesProb = (orderBook.topYesPrice / 10) * 100;
