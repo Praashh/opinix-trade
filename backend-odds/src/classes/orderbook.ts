@@ -1,3 +1,4 @@
+import redis from "../services/redis";
 import { AVLTree } from "./avl-tree";
 
 interface Order {
@@ -19,15 +20,15 @@ export class Orderbook {
         //  adding buy
         const buyOrder = {
             id: `buy1`,
-            quantity: 10,
+            quantity: 100,
             price: 5,
             timeStamp: Date.now()
         }
-            this.buyOrders.insert(buyOrder.price, [buyOrder]);
+        this.buyOrders.insert(buyOrder.price, [buyOrder]);
         //  adding sell
         const sellOrder = {
             id: `sell1`,
-            quantity: 10,
+            quantity: 100,
             price: 5,
             timeStamp: Date.now()
         };
@@ -35,29 +36,38 @@ export class Orderbook {
         
         return {message: "Market Initiated", yes:{buyOrder}, no:{sellOrder}};
     }
-    addBuyOrder(order: Order): void {
-        const existingOrders = this.buyOrders.find(order.price);
+    async addBuyOrder(): Promise<void> {
+        const data = await redis.brPop("YesTrade", 0);
+        const yesData = JSON.parse(data?.element!);
+        console.log("YesRedis Data", yesData.Trade);
+        
+        const existingOrders = this.buyOrders.find(yesData.Trade.price);
         if (existingOrders) {
-            existingOrders.push(order);
+            existingOrders.push(yesData.Trade);
             existingOrders.sort((a, b) => a.timeStamp - b.timeStamp);
         } else {
-            this.buyOrders.insert(order.price, [order]);
+            this.buyOrders.insert(yesData.Trade.price, [yesData.Trade]);
         }
         this.matchOrders();
     }
 
-    addSellOrder(order: Order): void {
-        const existingOrders = this.sellOrders.find(order.price);
+    async addSellOrder(): Promise<void> {
+        const data = await redis.brPop("NoTrade", 0);
+        const noData = JSON.parse(data?.element!);
+        console.log("NoRedis Data", noData.Trade);
+
+        const existingOrders = this.sellOrders.find(noData.Trade.price);
         if (existingOrders) {
-            existingOrders.push(order);
+            existingOrders.push(noData.Trade);
             existingOrders.sort((a, b) => a.timeStamp - b.timeStamp);
         } else {
-            this.sellOrders.insert(order.price, [order]);
+            this.sellOrders.insert(noData.Trade.price, [noData.Trade]);
         }
         this.matchOrders();
     }
 
     private matchOrders(): void {
+        let tradeCommision = 0.01;
         while (true) {
             const highestBuy = this.buyOrders.findMax();
             const lowestSell = this.sellOrders.findMin();
@@ -65,13 +75,24 @@ export class Orderbook {
             if (!highestBuy || !lowestSell || highestBuy[0].price < lowestSell[0].price) {
                 break;
             }
-
+            // trade executing
             const buyOrder = highestBuy.shift()!;
             const sellOrder = lowestSell.shift()!;
 
             const matchedQuantity = Math.min(buyOrder.quantity, sellOrder.quantity);
-            console.log(`Matched: ${matchedQuantity} units at price ${sellOrder.price}`);
+            const tradePrice = sellOrder.price; // Trade happens at the seller's price
 
+            // 1% commission for both buyer and seller
+            const buyerCommission = (matchedQuantity * tradePrice) * tradeCommision;
+            const sellerCommission = (matchedQuantity * tradePrice) * tradeCommision;
+
+            const totalPaidByBuyer = (matchedQuantity * tradePrice) + buyerCommission;
+            const totalReceivedBySeller = (matchedQuantity * tradePrice) - sellerCommission;
+            console.log("-------------------------------------------------------------");
+            console.log(`Matched: ${matchedQuantity} units at price ${tradePrice}`);
+            console.log(`Buyer pays: ${totalPaidByBuyer} (includes ${buyerCommission} commission)`);
+            console.log(`Seller receives: ${totalReceivedBySeller} (after ${sellerCommission} commission)`);
+            console.log("-------------------------------------------------------------");
             buyOrder.quantity -= matchedQuantity;
             sellOrder.quantity -= matchedQuantity;
 

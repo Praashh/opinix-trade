@@ -3,6 +3,7 @@ import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { eventData } from '@/lib/event-data';
+import { Link } from 'react-router-dom';
 // @ts-ignore
 const client = new W3CWebSocket('http://localhost:8080');
 
@@ -17,7 +18,7 @@ const EventCard = ({ event }:any) => (
       </div>
     </CardHeader>
     <CardContent>
-      <h3 className="font-bold text-lg mb-2">{event.title}</h3>
+      <Link to={event.url}><h3 className="font-bold text-lg mb-2">{event.title}</h3></Link>
       <p className="text-sm text-gray-500">{event.status}</p>
     </CardContent>
     <CardFooter className="flex justify-between">
