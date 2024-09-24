@@ -1,3 +1,4 @@
+import React, { useState, useEffect } from "react";
 import {
   Table,
   TableBody,
@@ -10,73 +11,114 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
-import { useState, useEffect } from "react";
 import LineChart from "../ui/line-chart";
+import axios from "axios";
+import Portfolio from "../ui/Portfolio";
 
-const OrderBook = () => {
-  //@ts-ignore
-  const [yesPrice, setYesPrice] = useState(5);
-  //@ts-ignore
-  const [noPrice, setNoPrice] = useState(5);
+interface OrderBookItem {
+  price: number;
+  quantity: number;
+}
 
-  const [toggle, setToggle] = useState(true); 
+interface OrderBookData {
+  yes: OrderBookItem[];
+  no: OrderBookItem[];
+  topYesPrice: number;
+  topNoPrice: number;
+}
 
-  const labels = [
-    "10:00 AM",
-    "10:30 AM",
-    "11:00 AM",
-    "11:30 AM",
-    "12:00 PM",
-    "12:30 PM",
-    "1:00 PM",
-    "1:30 PM",
-    "2:00 PM",
-    "2:30 PM",
-  ];
-  const data_yes = [1, 5, 3, 6, 2, 4, 7, 5, 8, 6]; 
-  const data_no = [2, 5, 4, 2, 1, 3, 6, 2, 3, 5]; 
-  // @ts-ignore
-  const [socket, setSocket] = useState<null | WebSocket>(null)
-  const [latestMessage, setLatestMessage] = useState<string | null>(null)
+interface WebSocketData {
+  orderBook: OrderBookData;
+  probability: {
+    yesProb: number;
+    noProb: number;
+  };
+}
+
+const OrderBook: React.FC = () => {
+  const [orderBookData, setOrderBookData] = useState<OrderBookData | null>(
+    null
+  );
+  const [yesPrice, setYesPrice] = useState<number>(0); // Initialize to 0
+  const [noPrice, setNoPrice] = useState<number>(0); // Initialize to 0
+  const [toggle, setToggle] = useState<boolean>(true);
+  const [yesProbability, setYesProbability] = useState<number[]>([]);
+  const [noProbability, setNoProbability] = useState<number[]>([]);
+  const [timeSeries, setTimeSeries] = useState<string[]>([]);
+  const [socket, setSocket] = useState<WebSocket | null>(null);
+  const [side, setSide] = useState<"yes" | "no">("yes");
+  const [tradePrice, setTradePrice] = useState<number>(0); // State for trade price input
+  const [tradeQuantity, setTradeQuantity] = useState<number>(1); // State for trade quantity input
+  const [portfolioData, setPortfolioData] = useState<any>(null);
 
   useEffect(() => {
-    const newSocket = new WebSocket('ws://localhost:3000')
+    const newSocket = new WebSocket("ws://3.234.207.188:3000");
 
-    newSocket.onopen = () => { 
-      console.log('Connected to server')
-      setSocket(newSocket)
-    }
+    newSocket.onopen = () => {
+      console.log("Connected to server");
+      setSocket(newSocket);
+    };
 
-    newSocket.onmessage = (event) => {
-      console.log("Received data: " + event.data)
-      setLatestMessage(event.data)
-    }
+    newSocket.onmessage = (event: MessageEvent) => {
+      const data: WebSocketData = JSON.parse(event.data);
+      setOrderBookData(data.orderBook);
+      setYesPrice(data.orderBook.topYesPrice);
+      setNoPrice(data.orderBook.topNoPrice);
+
+      const yesProbability = data.probability.yesProb;
+      const noProbability = data.probability.noProb;
+
+      setYesProbability((prev) => [...prev, yesProbability]);
+      setNoProbability((prev) => [...prev, noProbability]);
+      setTimeSeries((prev) => [...prev, new Date().toLocaleTimeString()]);
+    };
+
+    const getPortfolio = async () => {
+      try {
+        const response = await axios.get("http://3.234.207.188:3000/v1/portfolio");
+        setPortfolioData(response.data);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    getPortfolio();
 
     return () => {
-      newSocket.close()
+      newSocket.close();
+    };
+  }, []);
+
+  const labels = timeSeries;
+  const data_yes = yesProbability;
+  const data_no = noProbability;
+
+  const handleTrade = async () => {
+    try {
+      const dataToSend = {
+        side,
+        price: tradePrice, // Use the input from user
+        quantity: tradeQuantity, // Use the input from user
+      };
+
+      const response = await axios.post("http://3.234.207.188:3000/v1/order", dataToSend);
+      console.log(response.data);
+
+    } catch (err: any) {
+      console.error(err);
     }
-  }, [])
-
-  console.log("Latest message: " + latestMessage);
-
+  };
 
   return (
     <div className="container mx-auto p-4">
       <div className="flex flex-col md:flex-row gap-4 p-4">
         <div className="w-full md:w-2/3">
           <Tabs defaultValue="orderbook">
-            <TabsList>
-              <TabsTrigger value="orderbook">Orderbook</TabsTrigger>
-              <TabsTrigger value="timeline">Timeline</TabsTrigger>
-              <TabsTrigger value="overview">Overview</TabsTrigger>
-            </TabsList>
             <TabsContent value="orderbook">
               <Card>
                 <CardContent className="p-4">
                   <Tabs defaultValue="order_book">
                     <TabsList>
                       <TabsTrigger value="order_book">Order Book</TabsTrigger>
-                      <TabsTrigger value="activity">Activity</TabsTrigger>
                     </TabsList>
                     <TabsContent value="order_book">
                       <Table>
@@ -89,14 +131,30 @@ const OrderBook = () => {
                           </TableRow>
                         </TableHeader>
                         <TableBody>
-                          {[...Array(5)].map((_, index) => (
-                            <TableRow key={index}>
-                              <TableCell>0</TableCell>
-                              <TableCell>0</TableCell>
-                              <TableCell>0</TableCell>
-                              <TableCell>0</TableCell>
-                            </TableRow>
-                          ))}
+                          {orderBookData &&
+                            orderBookData.yes
+                              .filter(item => item.price <= orderBookData.topYesPrice)
+                              .sort((a, b) => b.price - a.price) // Sort by price descending
+                              .slice(0, 5)
+                              .map((yesItem, index) => {
+                                const noItem = orderBookData.no
+                                  .filter(item => item.price <= orderBookData.topNoPrice)
+                                  .sort((a, b) => b.price - a.price) // Sort by price descending
+                                  .slice(0, 5)[index];
+
+                                return (
+                                  <TableRow key={index}>
+                                    <TableCell>{yesItem.price}</TableCell>
+                                    <TableCell>{yesItem.quantity}</TableCell>
+                                    {noItem && (
+                                      <>
+                                        <TableCell>{noItem.price}</TableCell>
+                                        <TableCell>{noItem.quantity}</TableCell>
+                                      </>
+                                    )}
+                                  </TableRow>
+                                );
+                              })}
                         </TableBody>
                       </Table>
                     </TabsContent>
@@ -110,27 +168,47 @@ const OrderBook = () => {
           <Card>
             <CardContent className="p-4">
               <div className="flex justify-between mb-4">
-                <Button variant="default" className="bg-blue-500 text-white">
+                <Button
+                  variant={side === "yes" ? "default" : "outline"}
+                  onClick={() => setSide("yes")}
+                  className={`bg-blue-500 text-white ${
+                    side === "yes" ? "active" : ""
+                  }`}
+                >
                   Yes ₹{yesPrice}
                 </Button>
-                <Button variant="outline">No ₹{noPrice}</Button>
-              </div>
-              <div className="flex justify-between mb-4">
-                <Button variant="outline">Set price</Button>
-                <Button variant="outline">Instant match</Button>
+                <Button
+                  variant={side === "no" ? "default" : "outline"}
+                  onClick={() => setSide("no")}
+                  className={`bg-red-500 text-white ${
+                    side === "no" ? "active" : ""
+                  }`}
+                >
+                  No ₹{noPrice}
+                </Button>
               </div>
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700">
                   Price
                 </label>
-                <Input type="number" value="9.5" className="mt-1" />
+                <Input
+                  type="number"
+                  value={tradePrice} // Controlled input for trade price
+                  onChange={(e) => setTradePrice(Number(e.target.value))} // Update state on change
+                  className="mt-1"
+                />
                 <p className="text-sm text-gray-500">0 qty available</p>
               </div>
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700">
                   Quantity
                 </label>
-                <Input type="number" value="1" className="mt-1" />
+                <Input
+                  type="number"
+                  value={tradeQuantity} // Controlled input for trade quantity
+                  onChange={(e) => setTradeQuantity(Number(e.target.value))} // Update state on change
+                  className="mt-1"
+                />
               </div>
               <div className="flex justify-between mb-4">
                 <div>
@@ -144,7 +222,16 @@ const OrderBook = () => {
                   <p className="text-sm text-gray-500">You get</p>
                 </div>
               </div>
-              <Button className="w-full bg-blue-500 text-white">
+              <Button
+                onClick={handleTrade}
+                className={`w-full text-white ${
+                  side === "yes"
+                    ? "bg-blue-500"
+                    : side === "no"
+                    ? "bg-red-500"
+                    : "bg-gray-500"
+                }`}
+              >
                 Place order
               </Button>
             </CardContent>
@@ -161,17 +248,23 @@ const OrderBook = () => {
         </Button>
       </div>
 
-      <LineChart
-  labels={labels}
-  data={toggle ? data_yes : data_no}
-  borderColor={toggle ? "rgba(255, 99, 77, 1)" : "rgba(85, 142, 255, 1)"}
-/>
+      {portfolioData && (
+      <Portfolio
+        side={portfolioData.side}
+        initialPrice={portfolioData.initialPrice}
+        currentPrice={portfolioData.currentPrice}
+        quantity={portfolioData.quantity}
+        gainLoss={portfolioData.gainLoss}
+      />
+    )}
 
+      <LineChart
+        labels={labels}
+        data={toggle ? data_yes : data_no}
+        borderColor={toggle ? "rgba(255, 99, 77, 1)" : "rgba(85, 142, 255, 1)"}
+      />
     </div>
   );
 };
 
 export default OrderBook;
-
-
-
