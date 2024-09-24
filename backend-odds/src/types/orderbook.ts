@@ -6,8 +6,8 @@ export interface Order {
   }
   
  export interface OrderbookType {
-    addBuyOrder(order: Order): void;
-    addSellOrder(order: Order): void;
+    addBuyOrder(): Promise<void>;
+    addSellOrder(): Promise<void>;
     getOrderBookState(): object;
     getOrderDepth(levels: number): object;
     getBestBuyPrice(): number | null;
