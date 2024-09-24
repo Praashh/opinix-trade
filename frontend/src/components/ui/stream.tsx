@@ -6,7 +6,7 @@ const LiveNowIndicator = () => {
             className="live-indicator-container"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: 10, repeat: Infinity, repeatType: 'reverse' }}
+            transition={{ duration: 5, repeat: Infinity, repeatType: 'reverse' }}
             style={{
                 display: 'flex',
                 alignItems: 'center',
