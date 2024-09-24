@@ -1,6 +1,7 @@
 import { Router } from "express";
 import {
   calculateProbabilty,
+  getPortfolio,
   orderBook,
   processOrder,
 } from "../utils/marketMaker";
@@ -29,5 +30,13 @@ router.post("/order", (req, res) => {
 
   res.json({ message: "Order processed successfully." });
 });
+
+router.get("/portfolio",(req,res)=>{
+   const portfolio = getPortfolio();
+   if(!portfolio.success){
+    return res.status(400).json({ message: portfolio.message });
+   }
+   return res.json(portfolio);
+})
 
 export default router;

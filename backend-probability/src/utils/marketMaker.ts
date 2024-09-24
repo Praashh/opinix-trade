@@ -11,6 +11,8 @@ type OrderBook = {
   topNoPrice: number;
 };
 
+let userOrder : {side : "yes"|"no"; price : number ; quantity : number;} | null = null
+
 const initializeOrderBook = (): OrderBook => {
   const orderBook: OrderBook = {
     yes: [],
@@ -61,6 +63,8 @@ export const processOrder = (
         orderBook.topYesPrice += 0.5;
         orderBook.topNoPrice -= 0.5;
       }
+      userOrder = { side, price, quantity };
+      broadcastOrderBook(orderBook);
       return { success: true }; 
     }else{
       return { success: false, message: "Not enough quantity available." };
@@ -81,6 +85,8 @@ export const processOrder = (
         orderBook.topNoPrice -= 0.5;
         orderBook.topYesPrice += 0.5;
       }
+      userOrder = { side, price, quantity };
+      broadcastOrderBook(orderBook);
       return { success: true };
     }else{
       return { success: false, message: "Not enough quantity available." };
@@ -108,7 +114,7 @@ const broadcastOrderBook = (orderBook: OrderBook) => {
   });
 };
 
-setInterval(() => {
+/*setInterval(() => {
   orderBook.yes.forEach((order) => {
     const change = Math.floor(Math.random() * 5) - 2;
     order.quantity = Math.max(0, order.quantity + change);
@@ -121,3 +127,20 @@ setInterval(() => {
 
   broadcastOrderBook(orderBook);
 }, 20000);
+*/
+
+export const getPortfolio = ()=>{
+  if(!userOrder){
+    return { success: false, message: "No orders placed yet." };
+  }
+  const currentPrice = userOrder.side === "yes" ? orderBook.topYesPrice : orderBook.topNoPrice;
+  const gainLoss = (currentPrice - userOrder.price) * userOrder.quantity;
+  return {
+    success: true,
+    side: userOrder.side,
+    initialPrice: userOrder.price,
+    currentPrice,
+    quantity: userOrder.quantity,
+    gainLoss: gainLoss.toFixed(2), 
+  };
+}
