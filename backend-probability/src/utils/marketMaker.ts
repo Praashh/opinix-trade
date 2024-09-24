@@ -31,11 +31,25 @@ const initializeOrderBook = (): OrderBook => {
   };
 
   for (let price = 0.5; price <= 9.5; price += 0.5) {
-    orderBook.yes.push({
-      price,
-      quantity: Math.floor(Math.random() * 100) + 1,
-    });
-    orderBook.no.push({ price, quantity: Math.floor(Math.random() * 100) + 1 });
+    if (price < 5) {
+      orderBook.yes.push({
+        price,
+        quantity: 0,
+      });
+      orderBook.no.push({
+        price,
+        quantity: 0,
+      });
+    } else {
+      orderBook.yes.push({
+        price,
+        quantity: Math.floor(Math.random() * 100) + 1,
+      });
+      orderBook.no.push({
+        price,
+        quantity: Math.floor(Math.random() * 100) + 1,
+      });
+    }
   }
   orderBook.topYesPrice = 5;
   orderBook.topNoPrice = 5;
@@ -43,9 +57,6 @@ const initializeOrderBook = (): OrderBook => {
   return orderBook;
 };
 export let orderBook = initializeOrderBook();
-
-
-
 
 export const processOrder = (
   side: "yes" | "no",
@@ -85,18 +96,16 @@ export const processOrder = (
       if (topYes.quantity === 0) {
         orderBook.topYesPrice += 0.5;
         orderBook.topNoPrice -= 0.5;
-        broadcastPortfolio()
+        const newTopNo = orderBook.no.find(order => order.price === orderBook.topNoPrice);
+        if (newTopNo) {
+          newTopNo.quantity = Math.floor(Math.random() * 100) + 1; 
+        }
+        broadcastPortfolio();
       }
-
 
       broadcastOrderBook(orderBook);
       return { success: true };
     } else {
-
-      broadcastOrderBook(orderBook);
-      return { success: true }; 
-    }else{
-
       return { success: false, message: "Not enough quantity available." };
     }
   } else {
@@ -124,11 +133,11 @@ export const processOrder = (
       if (topNo.quantity === 0) {
         orderBook.topNoPrice += 0.5;
         orderBook.topYesPrice -= 0.5;
-
-        broadcastPortfolio()
-      }
-
-
+        const newTopYes = orderBook.yes.find(order => order.price === orderBook.topYesPrice);
+        if (newTopYes) {
+          newTopYes.quantity = Math.floor(Math.random() * 100) + 1; 
+        }
+        broadcastPortfolio();
       }
 
       broadcastOrderBook(orderBook);
@@ -137,11 +146,6 @@ export const processOrder = (
       return { success: false, message: "Not enough quantity available." };
     }
   }
-
-
-
-  
-
 };
 export const calculateProbabilty = (orderBook: OrderBook) => {
   const yesProb = (orderBook.topYesPrice / 10) * 100;
@@ -153,21 +157,22 @@ export const calculateProbabilty = (orderBook: OrderBook) => {
   };
 };
 
-
-/*setInterval(() => {
+setInterval(() => {
   orderBook.yes.forEach((order) => {
+    if (order.price >= orderBook.topYesPrice) {
     const change = Math.floor(Math.random() * 5) - 2;
     order.quantity = Math.max(0, order.quantity + change);
-  });
+  }});
 
   orderBook.no.forEach((order) => {
+    if (order.price >= orderBook.topNoPrice) {
     const change = Math.floor(Math.random() * 5) - 2;
     order.quantity = Math.max(0, order.quantity + change);
-  });
+  }});
 
   broadcastOrderBook(orderBook);
 }, 30000);
-*/
+
 
 export const getPortfolio = () => {
   if (!userPortfolio.side || userPortfolio.initialPrice === null) {
@@ -197,9 +202,9 @@ const broadcastOrderBook = (orderBook: OrderBook) => {
     probability,
   });
 };
-const broadcastPortfolio = ()=>{
+const broadcastPortfolio = () => {
   const portfolio = getPortfolio();
   WebsocketServer.broadcast({
-    portfolio
-  })
-}
+    portfolio,
+  });
+};
