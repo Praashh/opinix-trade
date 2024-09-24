@@ -82,6 +82,7 @@ export const processOrder = (
       if (topYes.quantity === 0) {
         orderBook.topYesPrice += 0.5;
         orderBook.topNoPrice -= 0.5;
+        broadcastPortfolio()
       }
 
       broadcastOrderBook(orderBook);
@@ -114,6 +115,7 @@ export const processOrder = (
       if (topNo.quantity === 0) {
         orderBook.topNoPrice += 0.5;
         orderBook.topYesPrice -= 0.5;
+        broadcastPortfolio()
       }
 
       broadcastOrderBook(orderBook);
@@ -132,16 +134,9 @@ export const calculateProbabilty = (orderBook: OrderBook) => {
     noProb,
   };
 };
-const broadcastOrderBook = (orderBook: OrderBook) => {
-  const probability = calculateProbabilty(orderBook);
 
-  WebsocketServer.broadcast({
-    orderBook,
-    probability,
-  });
-};
 
-setInterval(() => {
+/*setInterval(() => {
   orderBook.yes.forEach((order) => {
     const change = Math.floor(Math.random() * 5) - 2;
     order.quantity = Math.max(0, order.quantity + change);
@@ -153,8 +148,8 @@ setInterval(() => {
   });
 
   broadcastOrderBook(orderBook);
-}, 20000);
-
+}, 30000);
+*/
 
 export const getPortfolio = () => {
   if (!userPortfolio.side || userPortfolio.initialPrice === null) {
@@ -173,6 +168,20 @@ export const getPortfolio = () => {
     initialPrice: userPortfolio.initialPrice,
     currentPrice,
     quantity: userPortfolio.initialQuantity,
-    gainLoss: gainLoss.toFixed(2),
+    gainLoss: `${gainLoss.toFixed(2)} Rs`,
   };
 };
+const broadcastOrderBook = (orderBook: OrderBook) => {
+  const probability = calculateProbabilty(orderBook);
+
+  WebsocketServer.broadcast({
+    orderBook,
+    probability,
+  });
+};
+const broadcastPortfolio = ()=>{
+  const portfolio = getPortfolio();
+  WebsocketServer.broadcast({
+    portfolio
+  })
+}
