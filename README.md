@@ -11,6 +11,7 @@ This project is a real-time opinion trading platform where users can place bets 
  3. [Current Features](#current-features)
  4. [Future Steps](#future-steps)
  5. [Setup Instructions](#setup-instructions)
+ 6. [Demo](#Demo)
  <!-- 3. [Tech Stack](#tech-stack) -->
 
 ---
@@ -173,9 +174,9 @@ The system is designed to handle real-time updates and asynchronous order proces
   npm run dev
 ```
 ---
-## App:
+## Demo
 
-[![Demo](./frontend/public/logo.jpeg)](https://youtu.be/Figa92BwEpE)
+[![Demo](./frontend/public/logo.png)](https://youtu.be/Figa92BwEpE)
 
 ## Backend-Odds Demo:
 
