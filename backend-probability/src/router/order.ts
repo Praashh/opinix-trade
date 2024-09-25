@@ -23,21 +23,20 @@ router.post("/order", (req, res) => {
   }
 
   const result = processOrder(side, quantity, price, orderBook);
- //@ts-ignore
+
   if (!result.success) {
-     //@ts-ignore
     return res.status(400).json({ error: result.message });
   }
 
   res.json({ message: "Order processed successfully." });
 });
 
-router.get("/portfolio",(req,res)=>{
-   const portfolio = getPortfolio();
-   if(!portfolio.success){
+router.get("/portfolio", (req, res) => {
+  const portfolio = getPortfolio();
+  if (!portfolio.success) {
     return res.status(400).json({ message: portfolio.message });
-   }
-   return res.json(portfolio);
-})
+  }
+  return res.json(portfolio);
+});
 
 export default router;
