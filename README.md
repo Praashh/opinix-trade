@@ -8,10 +8,10 @@ This project is a real-time opinion trading platform where users can place bets 
 
  1. [Introduction](#introduction)
  2. [Architecture](#architecture)
- 3. [Tech Stack](#tech-stack)
- 4. [Current Features](#current-features)
- 5. [Future Steps](#future-steps)
- 6. [Setup Instructions](#setup-instructions)
+ 3. [Current Features](#current-features)
+ 4. [Future Steps](#future-steps)
+ 5. [Setup Instructions](#setup-instructions)
+ <!-- 3. [Tech Stack](#tech-stack) -->
 
 ---
 

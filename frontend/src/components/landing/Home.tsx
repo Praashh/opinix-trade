@@ -1,36 +1,5 @@
-import { w3cwebsocket as W3CWebSocket } from 'websocket';
-import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
-import { Avatar } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { eventData } from '@/lib/event-data';
-import { Link } from 'react-router-dom';
-// @ts-ignore
-const client = new W3CWebSocket('http://localhost:8080');
-
-const EventCard = ({ event }:any) => (
-  <Card className="w-full max-w-sm">
-    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-      <div className="flex items-center space-x-2">
-        <Avatar>
-          <div className="text-2xl">{event.icon}</div>
-        </Avatar>
-        <span className="font-bold text-sm">{event.traders} traders</span>
-      </div>
-    </CardHeader>
-    <CardContent>
-      <Link to={event.url}><h3 className="font-bold text-lg mb-2">{event.title}</h3></Link>
-      <p className="text-sm text-gray-500">{event.status}</p>
-    </CardContent>
-    <CardFooter className="flex justify-between">
-      <Badge variant="secondary" className="bg-blue-100 text-blue-800">
-        {event.yesOption.text} {event.yesOption.price}
-      </Badge>
-      <Badge variant="secondary" className="bg-red-100 text-red-800">
-        {event.noOption.text} {event.noOption.price}
-      </Badge>
-    </CardFooter>
-  </Card>
-);
+import { EventCard } from "../ui/EventCard";
 
 export default function Home() {
 

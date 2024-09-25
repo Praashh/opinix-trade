@@ -1,8 +1,8 @@
-import redis from "../services/redis";
 import { AVLTree } from "./avl-tree";
 
 interface Order {
     id: string;
+    side:string;
     quantity: number;
     price: number;
     timeStamp: number;
@@ -21,6 +21,7 @@ export class Orderbook {
         const buyOrder = {
             id: `buy1`,
             quantity: 100,
+            side:"yes",
             price: 5,
             timeStamp: Date.now()
         }
@@ -29,6 +30,7 @@ export class Orderbook {
         const sellOrder = {
             id: `sell1`,
             quantity: 100,
+            side:"no",
             price: 5,
             timeStamp: Date.now()
         };
@@ -36,32 +38,24 @@ export class Orderbook {
         
         return {message: "Market Initiated", yes:{buyOrder}, no:{sellOrder}};
     }
-    async addBuyOrder(): Promise<void> {
-        const data = await redis.brPop("YesTrade", 0);
-        const yesData = JSON.parse(data?.element!);
-        console.log("YesRedis Data", yesData.Trade);
-        
-        const existingOrders = this.buyOrders.find(yesData.Trade.price);
+    addBuyOrder(order: Order): void {
+        const existingOrders = this.buyOrders.find(order.price);
         if (existingOrders) {
-            existingOrders.push(yesData.Trade);
+            existingOrders.push(order);
             existingOrders.sort((a, b) => a.timeStamp - b.timeStamp);
         } else {
-            this.buyOrders.insert(yesData.Trade.price, [yesData.Trade]);
+            this.buyOrders.insert(order.price, [order]);
         }
         this.matchOrders();
     }
 
-    async addSellOrder(): Promise<void> {
-        const data = await redis.brPop("NoTrade", 0);
-        const noData = JSON.parse(data?.element!);
-        console.log("NoRedis Data", noData.Trade);
-
-        const existingOrders = this.sellOrders.find(noData.Trade.price);
+    addSellOrder(order: Order): void {
+        const existingOrders = this.sellOrders.find(order.price);
         if (existingOrders) {
-            existingOrders.push(noData.Trade);
+            existingOrders.push(order);
             existingOrders.sort((a, b) => a.timeStamp - b.timeStamp);
         } else {
-            this.sellOrders.insert(noData.Trade.price, [noData.Trade]);
+            this.sellOrders.insert(order.price, [order]);
         }
         this.matchOrders();
     }
