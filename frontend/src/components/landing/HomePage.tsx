@@ -20,10 +20,10 @@ export default function HomePage() {
                             OpiniX{" "}
                             <div className="relative mx-auto inline-block w-max [filter:drop-shadow(0px_1px_3px_rgba(27,_37,_80,_0.14))]">
                                 <div className="absolute left-0 top-[1px] bg-clip-text bg-no-repeat text-transparent bg-gradient-to-r py-4 from-purple-500 via-violet-500 to-pink-500 [text-shadow:0_0_rgba(0,0,0,0.1)]">
-                                    <span className="">Exploding beams.</span>
+                                    <span className="">-Trade your opinion.</span>
                                 </div>
                                 <div className="relative bg-clip-text text-transparent bg-no-repeat bg-gradient-to-r from-purple-500 via-violet-500 to-pink-500 py-4">
-                                    <span className="">Exploding beams.</span>
+                                    <span className="">-Trade your opinion.</span>
                                 </div>
                             </div>
                         </h2>
@@ -35,8 +35,7 @@ export default function HomePage() {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.3, duration: 0.8 }}
                     >
-                        Share your thoughts, explore trending opinions, and engage with the community.
-                    </motion.p>
+                        It allows you to take positions on future events and reimagine how we share opinions.                    </motion.p>
 
                     <motion.div
                         className="space-x-4 flex justify-center items-center"
@@ -47,9 +46,9 @@ export default function HomePage() {
                         <Button className="bg-blue-500 h-10 font-medium w-40 hover:bg-blue-600 text-white px-4 py-2 rounded-lg">
                             Create Event
                         </Button>
-                        <Button 
-                        onClick={()=>{navigate('/portfolio')}}
-                        className="bg-gray-300 hover:bg-gray-400 text-gray-700 px-4 py-2 rounded-lg">
+                        <Button
+                            onClick={() => { navigate('/portfolio') }}
+                            className="bg-gray-300 hover:bg-gray-400 text-gray-700 px-4 py-2 rounded-lg">
                             Portfolio
                         </Button>
                     </motion.div>
