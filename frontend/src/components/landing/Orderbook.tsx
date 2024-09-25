@@ -50,7 +50,7 @@ const OrderBook: React.FC = () => {
   const [tradeQuantity, setTradeQuantity] = useState<number>(1); 
 
   useEffect(() => {
-    const newSocket = new WebSocket("ws://3.234.207.188:3000");
+    const newSocket = new WebSocket("wss://3.234.207.188:3000");
 
     newSocket.onopen = () => {
       console.log("Connected to server");

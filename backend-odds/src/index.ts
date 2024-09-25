@@ -3,6 +3,7 @@ import http from 'http';
 import cors from "cors"
 import { Orderbook } from './classes/orderbook';
 import { setupWebSocketServer } from './ws';
+import rootRouter from "./routes/index"
 import { config } from 'dotenv';
 config();
 
@@ -37,6 +38,9 @@ app.get('/initiate-market', (req: Request, res: Response) => {
 app.get('/', (req: Request, res: Response) => {
   res.send('WebSocket server running.');
 });
+
+app.use('/api/v1', rootRouter);
+
 console.log(process.env.PORT);
 
 server.listen(process.env.PORT, () => {

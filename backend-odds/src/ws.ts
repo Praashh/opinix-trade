@@ -33,27 +33,23 @@ async function placeRandomOrders(orderbook: OrderbookType, wss: WebSocketServer)
       sellPrice = 6.3;
     }
 
-    // orderbook.addBuyOrder({
-    //   id: `buy${buyId}`,
-    //   quantity: buyQuantity,
-    //   price: buyPrice,
-    //   timeStamp: Date.now(),
-    // });
-    await pushTradeInQueue({key:"YesTrade", Trade:{ id: `buy${buyId}`, quantity: buyQuantity, price: buyPrice, timeStamp: Date.now()}})
-    orderbook.addBuyOrder();
-    // const yesData = await redis.brPop("YesTrade", 0);
-    // console.log("YesTrade Redis", yesData?.element);
+    orderbook.addBuyOrder({
+      id: `buy${buyId}`,
+      side:"yes",
+      quantity: buyQuantity,
+      price: buyPrice,
+      timeStamp: Date.now(),
+    });
+    // await pushTradeInQueue({key:"Trade", Trade:{ id: `buy${buyId}`, quantity: buyQuantity, price: buyPrice, timeStamp: Date.now()}})
 
-    // orderbook.addSellOrder({
-    //   id: `sell${sellId}`,
-    //   quantity: sellQuantity,
-    //   price: sellPrice,
-    //   timeStamp: Date.now(),
-    // });
-    await pushTradeInQueue({key:"NoTrade", Trade:{ id: `sell${sellId}`, quantity: sellQuantity, price: sellPrice, timeStamp: Date.now()}})
-    orderbook.addSellOrder();
-    // const noData = await redis.brPop("NoTrade", 0);
-    // console.log("NoTrade Redis", noData?.element);
+    orderbook.addSellOrder({
+      id: `sell${sellId}`,
+      side:"no",
+      quantity: sellQuantity,
+      price: sellPrice,
+      timeStamp: Date.now(),
+    });
+    // await pushTradeInQueue({key:"Trade", Trade:{ id: `sell${sellId}`, quantity: sellQuantity, price: sellPrice, timeStamp: Date.now()}})
 
     console.log("\n--- Order Book State ---");
     console.log(orderbook.getOrderBookState());
