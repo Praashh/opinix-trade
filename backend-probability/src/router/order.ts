@@ -23,8 +23,9 @@ router.post("/order", (req, res) => {
   }
 
   const result = processOrder(side, quantity, price, orderBook);
-
+ //@ts-ignore
   if (!result.success) {
+     //@ts-ignore
     return res.status(400).json({ error: result.message });
   }
 
