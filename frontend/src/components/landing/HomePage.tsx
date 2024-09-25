@@ -2,8 +2,10 @@ import { motion } from "framer-motion";
 import { Button } from "../ui/button";
 import { eventData } from "@/lib/event-data";
 import { EventCard } from "../ui/EventCard";
+import { useNavigate } from "react-router-dom";
 
 export default function HomePage() {
+    const navigate = useNavigate();
     return (
         <div className="flex flex-col items-center justify-center min-h-screen">
             <div className="flex items-center justify-center w-full">
@@ -45,7 +47,9 @@ export default function HomePage() {
                         <Button className="bg-blue-500 h-10 font-medium w-40 hover:bg-blue-600 text-white px-4 py-2 rounded-lg">
                             Create Event
                         </Button>
-                        <Button className="bg-gray-300 hover:bg-gray-400 text-gray-700 px-4 py-2 rounded-lg">
+                        <Button 
+                        onClick={()=>{navigate('/portfolio')}}
+                        className="bg-gray-300 hover:bg-gray-400 text-gray-700 px-4 py-2 rounded-lg">
                             Portfolio
                         </Button>
                     </motion.div>
