@@ -172,6 +172,18 @@ The system is designed to handle real-time updates and asynchronous order proces
 ```
   npm run dev
 ```
+---
+## App:
+
+[![Demo](./frontend/public/logo.jpeg)](https://youtu.be/Figa92BwEpE)
+
+## Backend-Odds Demo:
+
+[![Demo](./frontend/public/home.png)](https://youtu.be/RGGiBAN-pWA)
+
+## Backend-Probability Demo:
+
+[![Demo](./frontend/public/home2.png)](https://youtu.be/Rmi6KaQyETk?si=oacKgwhw5V00zdUK)
 
 
 # TODOs
