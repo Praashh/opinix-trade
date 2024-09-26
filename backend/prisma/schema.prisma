@@ -1,0 +1,122 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+model User {
+  id          String     @id @default(cuid())
+  email       String?    @unique //using  google auth
+  phoneNumber String     @unique // using phonenumber
+  balance     Float      @default(0.0)
+  role        UserRole
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  portfolio   Portfolio?
+  events      Event[]    @relation("EventParticipants")
+  Event       Event[]
+  Payout      Payout[]
+}
+
+model Portfolio {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  user            User     @relation(references: [id], fields: [userId])
+  trades          Trade[]
+  currentBalances Float    @default(0.0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model Event {
+  id           String      @id @default(cuid())
+  title        String
+  description  String
+  adminId      String
+  admin        User        @relation(fields: [adminId], references: [id])
+  status       EventStatus @default(ONGOING)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  orderBook    OrderBook? // Each event has one order book
+  participants User[]      @relation("EventParticipants")
+  Trade        Trade[]
+}
+
+model OrderBook {
+  id          String     @id @default(cuid())
+  eventId     String     @unique
+  event       Event      @relation(references: [id], fields: [eventId])
+  topPriceYes Float
+  topPriceNo  Float
+  yes         YesOrder[]
+  no          NoOrder[]
+}
+
+model YesOrder {
+  id          String    @id @default(cuid())
+  orderBookId String
+  orderBook   OrderBook @relation(fields: [orderBookId], references: [id])
+  price       Float
+  quantity    Int
+  createdAt   DateTime  @default(now())
+}
+
+model NoOrder {
+  id          String    @id @default(cuid())
+  orderBookId String
+  orderBook   OrderBook @relation(fields: [orderBookId], references: [id])
+  price       Float
+  quantity    Int
+  createdAt   DateTime  @default(now())
+}
+
+model Trade {
+  id          String    @id @default(cuid())
+  portfolioId String
+  portfolio   Portfolio @relation(fields: [portfolioId], references: [id])
+  eventId     String
+  event       Event     @relation(fields: [eventId], references: [id])
+  price       Float
+  quantity    Int
+  side        TradeSide
+  createdAt   DateTime  @default(now())
+}
+
+model Payout {
+  id        String       @id @default(cuid())
+  userId    String
+  user      User         @relation(references: [id], fields: [userId])
+  amount    Float
+  status    PayoutStatus
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+}
+
+enum UserRole {
+  ADMIN
+  USER
+}
+
+enum EventStatus {
+  ONGOING
+  ENDED
+}
+
+enum TradeSide {
+  YES
+  NO
+}
+
+enum PayoutStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}
