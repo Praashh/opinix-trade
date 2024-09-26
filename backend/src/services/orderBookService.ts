@@ -1,5 +1,6 @@
-import { orderBook } from "./../utils/marketMaker";
+
 import { PrismaClient } from "@prisma/client";
+import { WebsocketServer } from "../router/websockets";
 
 const prisma = new PrismaClient();
 export async function updateOrderBook() {
@@ -62,6 +63,14 @@ export async function updateOrderBook() {
         },
       },
     });
+    WebsocketServer.broadcast(event.id,{
+        orderBook: {
+            yes: orderBook.yes,
+            no: orderBook.no,
+            topPriceYes: orderBook.topPriceYes,
+            topPriceNo: orderBook.topPriceNo,
+          },
+    })
     console.log("Order books updated successfully.");
   }
 }
