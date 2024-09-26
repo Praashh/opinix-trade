@@ -22,7 +22,7 @@ let userPortfolio: UserPortfolio = {
   initialQuantity: null,
 };
 
-const initializeOrderBook = (): OrderBook => {
+export const initializeOrderBook = (): OrderBook => {
   const orderBook: OrderBook = {
     yes: [],
     no: [],

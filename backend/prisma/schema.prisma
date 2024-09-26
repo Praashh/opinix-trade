@@ -19,7 +19,6 @@ model User {
   balance     Float      @default(0.0)
   role        UserRole
   createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
   portfolio   Portfolio?
   events      Event[]    @relation("EventParticipants")
   Event       Event[]

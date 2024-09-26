@@ -3,7 +3,10 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "dev": "tsc && node dist/index.js"
+    "dev": "tsc && node dist/index.js",
+    "prisma": {
+      "seed": "ts-node prisma/seed.ts"
+    }
   },
   "keywords": [],
   "author": "",
@@ -16,6 +19,7 @@
     "@types/ws": "^8.5.12",
     "body-parser": "^1.20.3",
     "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
     "express": "^4.21.0",
     "prisma": "^5.20.0",
     "ws": "^8.18.0"
