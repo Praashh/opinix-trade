@@ -6,6 +6,7 @@ import eventRouter from "./router/event";
 
 import http from "http";
 import { setupwebsocket } from "./router/websockets";
+import { updateOrderBook } from "./services/orderBookService";
 
 const app = express();
 
@@ -18,4 +19,6 @@ export const WebsocketServer = setupwebsocket(server);
 server.listen(3000, () => {
   console.log(`Server is running on http://localhost:3000`);
 });
-
+setInterval(async () => {
+  await updateOrderBook();
+}, 30000);
