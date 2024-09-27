@@ -1,6 +1,5 @@
-import { PrismaClient } from "@prisma/client";
+import prisma from "../utils/db";
 
-const prisma = new PrismaClient()
 export const getOrderBookForEvent = async (eventId: string) => {
   try {
     const event = await prisma.event.findUnique({

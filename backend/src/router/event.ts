@@ -1,9 +1,10 @@
-import { PrismaClient } from "@prisma/client";
+
 import { Router } from "express";
 import { initializeOrderBook } from "../utils/marketMaker";
+import prisma from "../utils/db";
 
 const router = Router();
-const prisma = new PrismaClient();
+
 
 router.post("/events", async (req, res) => {
   const { userId, title, description } = req.body;
