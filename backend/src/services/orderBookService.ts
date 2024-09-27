@@ -1,8 +1,6 @@
-
-import { PrismaClient } from "@prisma/client";
 import { WebsocketServer } from "../router/websockets";
+import prisma from "../utils/db";
 
-const prisma = new PrismaClient();
 export async function updateOrderBook() {
   const onGoingEvents = await prisma.event.findMany({
     where: {
@@ -63,14 +61,14 @@ export async function updateOrderBook() {
         },
       },
     });
-    WebsocketServer.broadcast(event.id,{
-        orderBook: {
-            yes: orderBook.yes,
-            no: orderBook.no,
-            topPriceYes: orderBook.topPriceYes,
-            topPriceNo: orderBook.topPriceNo,
-          },
-    })
+    WebsocketServer.broadcast(event.id, {
+      orderBook: {
+        yes: orderBook.yes,
+        no: orderBook.no,
+        topPriceYes: orderBook.topPriceYes,
+        topPriceNo: orderBook.topPriceNo,
+      },
+    });
     console.log("Order books updated successfully.");
   }
 }
