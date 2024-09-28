@@ -13,7 +13,7 @@ const LandingPage = () => {
   return (
     <div className="bg-bg">
       {/* Hero Section */}
-      <div className="flex flex-col pt-[150px] items-center justify-center">
+      <div className="flex flex-col pt-[150px] items-center justify-center w-screen h-screen">
         <div
           className="text-gray font-extralight font-sora text-center px-3 py-1 rounded-full
         shadow-[inset_-10px_-10px_30px_rgba(28,36,76,0.5),_inset_10px_10px_40px_rgba(28,36,76,0.5)]"
