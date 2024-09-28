@@ -31,8 +31,8 @@ export default function App() {
   return (
       <BrowserRouter>
       <Routes>
-        <Route path="/home" element={ <LandingPage/>}/>
-        <Route path="/" element={<HomePage/>}/>
+        <Route path="/" element={ <LandingPage/>}/>
+        <Route path="/home" element={<HomePage/>}/>
         <Route path="/event" element={<EventOverview/>}/>
         <Route path="/portfolio" element={<PortfolioPage/>}/>
       </Routes>
