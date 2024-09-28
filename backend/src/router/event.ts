@@ -1,33 +1,27 @@
-
 import { Router } from "express";
 import { initializeOrderBook } from "../utils/marketMaker";
 import prisma from "../utils/db";
+import { WebsocketServer } from "./websockets";
 
 const router = Router();
 
-
-router.post("/events", async (req, res) => {
-  const { userId, title, description } = req.body;
+router.post("/intialize", async (req, res) => {
+  const { eventId } = req.body;
   try {
-    const user = await prisma.user.findUnique({
+    const event = await prisma.event.findUnique({
       where: {
-        id: userId,
+        id: eventId,
       },
     });
-    if (!user || user.role !== "ADMIN") {
-      return res.json({ message: "Forbidden: Only admins can create events." });
+    if (!event) {
+      return res.status(403).json({ message: "No event found" });
     }
-    const event = await prisma.event.create({
-      data: {
-        title: title,
-        description: description,
-        adminId: userId,
-      },
-    });
     const orderbook = initializeOrderBook();
     await prisma.orderBook.create({
       data: {
         eventId: event.id,
+        topPriceYes: orderbook.topYesPrice,
+        topPriceNo: orderbook.topNoPrice,
         yes: {
           create: orderbook.yes.map((order) => ({
             price: order.price,
@@ -40,15 +34,22 @@ router.post("/events", async (req, res) => {
             quantity: order.quantity,
           })),
         },
-        topPriceYes: orderbook.topYesPrice,
-        topPriceNo: orderbook.topNoPrice,
       },
     });
-
-    return res.status(201).json(event);
+    WebsocketServer.broadcast(eventId, {
+      orderbook: {
+        yes: orderbook.yes,
+        no: orderbook.no,
+        topYesPrice: orderbook.topYesPrice,
+        topNoPrice: orderbook.topNoPrice,
+      },
+    });
+    return res
+      .status(201)
+      .json({ message: "Order book initialized successfully" });
   } catch (e) {
-    console.error(e);
-    return res.status(500).json({ message: "Internal Server Error" });
+    console.log("error intializing the event", e);
+    return res.status(500).json({ message: "Error intializing event" });
   }
 });
 
