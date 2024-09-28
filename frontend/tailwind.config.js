@@ -53,7 +53,14 @@ export default {
   				'4': 'hsl(var(--chart-4))',
   				'5': 'hsl(var(--chart-5))'
   			}
-  		}
+  		},
+		fontFamily: {
+			sora : ['Sora', 'sans-serif'],
+		},
+		colors:{
+			bg: '#05071A',
+			gray: '#9EA3BF'
+		}
   	}
   },
   plugins: [require("tailwindcss-animate")],

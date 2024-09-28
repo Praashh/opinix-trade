@@ -1,7 +1,9 @@
+@import url('https://fonts.googleapis.com/css2?family=Sora&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-@layer base {
+/* @layer base {
   :root {
     --background: 0 0% 100%;
     --foreground: 0 0% 3.9%;
@@ -63,4 +65,4 @@
   body {
     @apply bg-background text-foreground;
   }
-}
+} */
