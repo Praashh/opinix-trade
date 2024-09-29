@@ -66,3 +66,8 @@
     @apply bg-background text-foreground;
   }
 } */
+
+
+body{
+  @apply bg-bg
+}
