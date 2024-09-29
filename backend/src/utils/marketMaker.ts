@@ -1,5 +1,5 @@
 import { WebsocketServer } from "../router/websockets";
-import { updateOrderBook } from "../services/orderBookService";
+
 import { updateOrderbookAfterBid } from "../services/updateOrderBookForBids";
 
 interface Order {
@@ -88,11 +88,11 @@ export async function processOrder(
   const opposingSide = side === "yes" ? "no" : "yes";
   let topPrice = side === "yes" ? orderbook.topYesPrice : orderbook.topNoPrice;
   let opposingTopPrice =
-    side == "yes" ? orderbook.topYesPrice : orderbook.topNoPrice;
+    side == "yes" ? orderbook.topNoPrice : orderbook.topYesPrice;
   let totalfilledQty = 0;
   orderBook[side].sort((a, b) => a.price - b.price);
   if (price < topPrice) {
-    // add to the queue
+    return;
   } else {
     let currentTopPrice = topPrice;
     while (totalfilledQty < quantity && currentTopPrice <= 9.5) {
@@ -131,15 +131,11 @@ export async function processOrder(
         side === "yes" ? orderbook.topNoPrice : orderbook.topYesPrice;
 
       if (newTopOpposing < oldOppTop) {
-        for (
-          let price = oldOppTop - 0.5;
-          price >= newTopOpposing;
-          price -= 0.5
-        ) {
+        for (let price = oldOppTop; price >= newTopOpposing; price -= 0.5) {
           const matchingOrder = orderbook[opposingSide].find(
             (order) => order.price === price
           );
-          if (matchingOrder) {
+          if (matchingOrder && matchingOrder.quantity === 0) {
             matchingOrder.quantity = Math.floor(Math.random() * 100) + 1;
           }
         }
@@ -151,13 +147,12 @@ export async function processOrder(
         }`
       );
     }
+    await updateOrderbookAfterBid(orderbook);
     WebsocketServer.broadcast(orderbook.eventId, {
       orderbook,
     });
-    await updateOrderbookAfterBid(orderbook);
   }
 }
-
 // export const processOrder = (
 //   side: "yes" | "no",
 //   quantity: number,
