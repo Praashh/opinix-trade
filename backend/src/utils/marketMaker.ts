@@ -58,13 +58,13 @@ export const initializeOrderBook = (): OrderBook => {
 };
 export let orderBook = initializeOrderBook();
 
-// export const processOrder = (
-//   side: "yes" | "no",
-//   quantity: number,
-//   price: number,
-//   orderBook: OrderBook
-// ) => {
-/*
+export const processOrder = (
+  side: "yes" | "no",
+  quantity: number,
+  price: number,
+  orderBook : OrderBook
+) => {
+
   if (side === "yes") {
  
     if (price < orderBook.topYesPrice) {
@@ -73,13 +73,7 @@ export let orderBook = initializeOrderBook();
         message: "Invalid request: Price is lower than the top price for Yes.",
       };
     }
-
-    if (!userPortfolio.initialPrice && !userPortfolio.side) {
-      userPortfolio.side = "yes";
-      userPortfolio.initialPrice = orderBook.topYesPrice;
-      userPortfolio.initialQuantity = quantity;
-    }
-
+   
     let remainingQty = quantity;
     let currentPrice = orderBook.topYesPrice;
 
@@ -110,9 +104,7 @@ export let orderBook = initializeOrderBook();
     
     orderBook.topNoPrice = 10 - orderBook.topYesPrice;
 
-    
-    broadcastOrderBook(orderBook);
-    broadcastPortfolio();
+  
 
     return { success: true };
   } else if (side === "no") {
@@ -123,14 +115,6 @@ export let orderBook = initializeOrderBook();
         message: "Invalid request: Price is lower than the top price for No.",
       };
     }
-
-    
-    if (!userPortfolio.initialPrice && !userPortfolio.side) {
-      userPortfolio.side = "no";
-      userPortfolio.initialPrice = orderBook.topNoPrice;
-      userPortfolio.initialQuantity = quantity;
-    }
-
     
     let remainingQty = quantity;
     let currentPrice = orderBook.topNoPrice;
@@ -162,14 +146,11 @@ export let orderBook = initializeOrderBook();
     
     orderBook.topYesPrice = 10 - orderBook.topNoPrice;
 
-    
-    broadcastOrderBook(orderBook);
-    broadcastPortfolio();
-
+  
     return { success: true };
   }
 };
-  */
+  
 //   const topYes = orderBook.yes.find(
 //     (order) => order.price === orderBook.topYesPrice
 //   );
@@ -265,22 +246,6 @@ export let orderBook = initializeOrderBook();
 //     noProb,
 //   };
 // };
-
-// setInterval(() => {
-//   orderBook.yes.forEach((order) => {
-//     if (order.price >= orderBook.topYesPrice) {
-//     const change = Math.floor(Math.random() * 5) - 2;
-//     order.quantity = Math.max(0, order.quantity + change);
-//   }});
-
-//   orderBook.no.forEach((order) => {
-//     if (order.price >= orderBook.topNoPrice) {
-//     const change = Math.floor(Math.random() * 5) - 2;
-//     order.quantity = Math.max(0, order.quantity + change);
-//   }});
-
-//   broadcastOrderBook(orderBook);
-// }, 30000);
 
 
 // export const getPortfolio = () => {

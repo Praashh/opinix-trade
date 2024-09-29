@@ -11,7 +11,7 @@ router.post("/intialize", async (req, res) => {
     const event = await prisma.event.findUnique({
       where: {
         id: eventId,
-      },
+      }
     });
     if (!event) {
       return res.status(403).json({ message: "No event found" });
@@ -26,12 +26,15 @@ router.post("/intialize", async (req, res) => {
           create: orderbook.yes.map((order) => ({
             price: order.price,
             quantity: order.quantity,
+            status : 'PLACED'
           })),
+          
         },
         no: {
           create: orderbook.no.map((order) => ({
             price: order.price,
             quantity: order.quantity,
+            status : 'PLACED'
           })),
         },
       },
