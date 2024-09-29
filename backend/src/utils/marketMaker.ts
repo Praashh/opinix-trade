@@ -10,17 +10,6 @@ type OrderBook = {
   topYesPrice: number;
   topNoPrice: number;
 };
-interface UserPortfolio {
-  side: "yes" | "no" | null;
-  initialPrice: number | null;
-  initialQuantity: number | null;
-}
-
-let userPortfolio: UserPortfolio = {
-  side: null,
-  initialPrice: null,
-  initialQuantity: null,
-};
 
 export const initializeOrderBook = (): OrderBook => {
   const orderBook: OrderBook = {
@@ -58,98 +47,134 @@ export const initializeOrderBook = (): OrderBook => {
 };
 export let orderBook = initializeOrderBook();
 
-export const processOrder = (
-  side: "yes" | "no",
-  quantity: number,
-  price: number,
-  orderBook : OrderBook
-) => {
+export enum OrderStatus {
+  PENDING = "PENDING",
+  PLACED = "PLACED",
+}
+export interface YesOrder{
+  id : string,
+  orderBookId : string ,
+  price : number,
+  quantity : number,
+  status : OrderStatus,
+  createdAt : Date
+}
+export interface NoOrder{
+  id : string,
+  orderBookId : string ,
+  price : number,
+  quantity : number,
+  status : OrderStatus,
+  createdAt : Date
+}
 
-  if (side === "yes") {
+export interface OrderbookForOrders{
+ id : string,
+ eventId : string,
+ topYesPrice : number,
+ topNoPrice : number,
+ yes : YesOrder[],
+ no : NoOrder[]
+}
+
+export async function processOrder(side : "yes"|"no", price : number, quantity : number, orderbook : OrderbookForOrders){
+
+}
+
+
+
+// export const processOrder = (
+//   side: "yes" | "no",
+//   quantity: number,
+//   price: number,
+//   orderBook : any
+// ) => {
+
+//   if (side === "yes") {
  
-    if (price < orderBook.topYesPrice) {
-      return {
-        success: false,
-        message: "Invalid request: Price is lower than the top price for Yes.",
-      };
-    }
+//     if (price < orderBook.topYesPrice) {
+//       return {
+//         success: false,
+//         message: "Invalid request: Price is lower than the top price for Yes.",
+//       };
+//     }
    
-    let remainingQty = quantity;
-    let currentPrice = orderBook.topYesPrice;
+//     let remainingQty = quantity;
+//     let currentPrice = orderBook.topYesPrice;
 
-    while (remainingQty > 0 && currentPrice <= price) {
-      const currentOrder = orderBook.yes.find((order) => order.price === currentPrice);
-      if (currentOrder && currentOrder.quantity > 0) {
-        const qtyToFill = Math.min(currentOrder.quantity, remainingQty);
-        currentOrder.quantity -= qtyToFill;
-        remainingQty -= qtyToFill;
+//     while (remainingQty > 0 && currentPrice <= price) {
+//       const currentOrder = orderBook.yes.find((order) => order.price === currentPrice);
+//       if (currentOrder && currentOrder.quantity > 0) {
+//         const qtyToFill = Math.min(currentOrder.quantity, remainingQty);
+//         currentOrder.quantity -= qtyToFill;
+//         remainingQty -= qtyToFill;
 
        
-        if (currentOrder.quantity === 0) {
-          currentPrice += 0.5;
-        }
-      } else {
-        currentPrice += 0.5; 
-      }
-    }
+//         if (currentOrder.quantity === 0) {
+//           currentPrice += 0.5;
+//         }
+//       } else {
+//         currentPrice += 0.5; 
+//       }
+//     }
 
     
-    const nextTopYes = orderBook.yes.find((order) => order.quantity > 0);
-    if (nextTopYes) {
-      orderBook.topYesPrice = nextTopYes.price;
-    } else {
-      orderBook.topYesPrice = 9.5; 
-    }
+//     const nextTopYes = orderBook.yes.find((order) => order.quantity > 0);
+//     if (nextTopYes) {
+//       orderBook.topYesPrice = nextTopYes.price;
+//     } else {
+//       orderBook.topYesPrice = 9.5; 
+//     }
 
     
-    orderBook.topNoPrice = 10 - orderBook.topYesPrice;
+//     orderBook.topNoPrice = 10 - orderBook.topYesPrice;
 
   
 
-    return { success: true };
-  } else if (side === "no") {
+//     return { success: true };
+//   } else if (side === "no") {
     
-    if (price < orderBook.topNoPrice) {
-      return {
-        success: false,
-        message: "Invalid request: Price is lower than the top price for No.",
-      };
-    }
+//     if (price < orderBook.topNoPrice) {
+//       return {
+//         success: false,
+//         message: "Invalid request: Price is lower than the top price for No.",
+//       };
+//     }
     
-    let remainingQty = quantity;
-    let currentPrice = orderBook.topNoPrice;
+//     let remainingQty = quantity;
+//     let currentPrice = orderBook.topNoPrice;
 
-    while (remainingQty > 0 && currentPrice <= price) {
-      const currentOrder = orderBook.no.find((order) => order.price === currentPrice);
-      if (currentOrder && currentOrder.quantity > 0) {
-        const qtyToFill = Math.min(currentOrder.quantity, remainingQty);
-        currentOrder.quantity -= qtyToFill;
-        remainingQty -= qtyToFill;
+//     while (remainingQty > 0 && currentPrice <= price) {
+//       const currentOrder = orderBook.no.find((order) => order.price === currentPrice);
+//       if (currentOrder && currentOrder.quantity > 0) {
+//         const qtyToFill = Math.min(currentOrder.quantity, remainingQty);
+//         currentOrder.quantity -= qtyToFill;
+//         remainingQty -= qtyToFill;
 
        
-        if (currentOrder.quantity === 0) {
-          currentPrice += 0.5;
-        }
-      } else {
-        currentPrice += 0.5; 
-      }
-    }
+//         if (currentOrder.quantity === 0) {
+//           currentPrice += 0.5;
+//         }
+//       } else {
+//         currentPrice += 0.5; 
+//       }
+//     }
 
     
-    const nextTopNo = orderBook.no.find((order) => order.quantity > 0);
-    if (nextTopNo) {
-      orderBook.topNoPrice = nextTopNo.price;
-    } else {
-      orderBook.topNoPrice = 9.5; 
-    }
+//     const nextTopNo = orderBook.no.find((order) => order.quantity > 0);
+//     if (nextTopNo) {
+//       orderBook.topNoPrice = nextTopNo.price;
+//     } else {
+//       orderBook.topNoPrice = 9.5; 
+//     }
 
     
-    orderBook.topYesPrice = 10 - orderBook.topNoPrice;
+//     orderBook.topYesPrice = 10 - orderBook.topNoPrice;
 
   
-    return { success: true };
-  }
-};
+//     return { success: true };
+//   }
+// };
   
 //   const topYes = orderBook.yes.find(
 //     (order) => order.price === orderBook.topYesPrice
@@ -268,17 +293,17 @@ export const processOrder = (
 //     gainLoss: `${gainLoss.toFixed(2)} Rs`,
 //   };
 // };
-// // // const broadcastOrderBook = (orderBook: OrderBook) => {
-// // //   const probability = calculateProbabilty(orderBook);
+// const broadcastOrderBook = (orderBook: OrderBook) => {
+//   const probability = calculateProbabilty(orderBook);
 
-// // //   WebsocketServer.broadcast({
-// // //     orderBook,
-// // //     probability,
-// // //   });
-// // // };
-// // const broadcastPortfolio = () => {
-// //   const portfolio = getPortfolio();
-// //   WebsocketServer.broadcast({
-// //     portfolio,
-// //   });
-// // };
+//   WebsocketServer.broadcast({
+//     orderBook,
+//     probability,
+//   });
+// };
+// const broadcastPortfolio = () => {
+//   const portfolio = getPortfolio();
+//   WebsocketServer.broadcast({
+//     portfolio,
+//   });
+// };
