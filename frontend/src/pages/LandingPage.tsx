@@ -24,21 +24,40 @@ const LandingPage: React.FC = () => {
       <LandingNavbar />
       <HeroSection />
 
-      <div className="relative w-screen">
-        {/* Background Image with better responsiveness */}
+      {/* <div className="relative flex justify-center items-center ">
         <img
           src={bgGradient}
-          alt=""
-          className="w-full h-auto absolute inset-0 object-cover"
+          alt="background"
+          className="absolute inset-0 w-full h-full object-cover z-0"
         />
 
-        {/* Main content area */}
-        <div className="relative flex justify-center items-center min-h-screen z-10">
-          <div className="p-3 border border-gray-300 rounded-xl max-w-[1000px] w-full">
-            <img src={dashboard} alt="" className="rounded-xl w-full h-auto" />
-          </div>
+        <div className="relative z-10 p-6 border border-gray shadow-xl rounded-2xl w-[70%]">
+          <img
+            src={dashboard}
+            alt="dashboard"
+            className="rounded-xl w-full h-auto"
+          />
+        </div>
+      </div> */}
+
+<div className="relative flex justify-center items-center ">
+        <img
+          src={bgGradient}
+          alt="background"
+          className="absolute inset-0 w-full h-full object-cover z-0"
+        />
+
+        <div className="relative z-10 p-6 border border-gray shadow-xl rounded-2xl w-[70%]">
+          <img
+            src={dashboard}
+            alt="dashboard"
+            className="rounded-xl w-full h-auto"
+          />
         </div>
       </div>
+
+
+
 
       {/* Transactions info */}
       <div className="flex p-6 mt-52 gap-20">

@@ -85,21 +85,22 @@ export const LandingNavbar = () => {
 };
 
 export const HeroSection: React.FC = () => (
-  <div className="flex flex-col items-center justify-center sm:h-screen">
-    <div className="text-gray font-extralight font-sora text-center px-3 py-1 rounded-full shadow-[inset_-10px_-10px_30px_rgba(28,36,76,0.5),_inset_10px_10px_40px_rgba(28,36,76,0.5)]">
+  <div className="flex flex-col items-center justify-center min-h-screen bg-[#05071A] text-center px-4">
+    <div className="text-gray font-extralight font-sora px-3 py-1 rounded-full shadow-[inset_-10px_-10px_30px_rgba(28,36,76,0.5),_inset_10px_10px_40px_rgba(28,36,76,0.5)]">
       Mobile app available. Download now.
     </div>
-    <div className="text-white font-sora text-6xl text-center mt-14 px-5">
+    <h1 className="text-white font-sora text-6xl mt-14 mb-4">
       Trade Your Opinion using <br /> OpiniX
-    </div>
-    <div className="text-gray font-sora mt-3 text-center px-5 md:w-1/2">
+    </h1>
+    <p className="text-gray font-sora mb-8 max-w-2xl">
       Join a dynamic platform where you can predict outcomes, buy and sell
       shares on various events, and profit from your insights. Turn your
       opinions into real value and engage in real-time markets today!
-    </div>
+    </p>
     <Button text="Get Started" onClick={() => {}} />
   </div>
 );
+
 
 export const Button: React.FC<ButtonProps> = ({ text, onClick }) => (
   <button
@@ -118,7 +119,7 @@ export const TransactionInfo: React.FC<TransactionInfoProps> = ({
   description,
 }) => (
   <div className="p-5 rounded-xl shadow-[inset_-10px_-10px_30px_rgba(28,36,76,0.5),_inset_10px_10px_40px_rgba(28,36,76,0.5)]">
-    <div className="flex justify-center mt-5 sm:grid grid-cols-1">
+    <div className="flex justify-center items-center mt-5 ">
       <div className="w-14 h-14 bg-[#101636] rounded-full">
         <img src={icon} alt="" className="w-10 h-10 mt-2 ml-2" />
       </div>
