@@ -1,4 +1,6 @@
-
+import { WebsocketServer } from "../router/websockets";
+import { updateOrderBook } from "../services/orderBookService";
+import { updateOrderbookAfterBid } from "../services/updateOrderBookForBids";
 
 interface Order {
   price: number;
@@ -51,37 +53,110 @@ export enum OrderStatus {
   PENDING = "PENDING",
   PLACED = "PLACED",
 }
-export interface YesOrder{
-  id : string,
-  orderBookId : string ,
-  price : number,
-  quantity : number,
-  status : OrderStatus,
-  createdAt : Date
+export interface YesOrder {
+  id: string;
+  orderBookId: string;
+  price: number;
+  quantity: number;
+  status: OrderStatus;
+  createdAt: Date;
 }
-export interface NoOrder{
-  id : string,
-  orderBookId : string ,
-  price : number,
-  quantity : number,
-  status : OrderStatus,
-  createdAt : Date
-}
-
-export interface OrderbookForOrders{
- id : string,
- eventId : string,
- topYesPrice : number,
- topNoPrice : number,
- yes : YesOrder[],
- no : NoOrder[]
+export interface NoOrder {
+  id: string;
+  orderBookId: string;
+  price: number;
+  quantity: number;
+  status: OrderStatus;
+  createdAt: Date;
 }
 
-export async function processOrder(side : "yes"|"no", price : number, quantity : number, orderbook : OrderbookForOrders){
-
+export interface OrderbookForOrders {
+  id: string;
+  eventId: string;
+  topYesPrice: number;
+  topNoPrice: number;
+  yes: YesOrder[];
+  no: NoOrder[];
 }
 
+export async function processOrder(
+  side: "yes" | "no",
+  price: number,
+  quantity: number,
+  orderbook: OrderbookForOrders
+) {
+  const opposingSide = side === "yes" ? "no" : "yes";
+  let topPrice = side === "yes" ? orderbook.topYesPrice : orderbook.topNoPrice;
+  let opposingTopPrice =
+    side == "yes" ? orderbook.topYesPrice : orderbook.topNoPrice;
+  let totalfilledQty = 0;
+  orderBook[side].sort((a, b) => a.price - b.price);
+  if (price < topPrice) {
+    // add to the queue
+  } else {
+    let currentTopPrice = topPrice;
+    while (totalfilledQty < quantity && currentTopPrice <= 9.5) {
+      const currentOrders = orderbook[side].filter(
+        (order) => order.price === currentTopPrice
+      );
+      if (currentOrders.length > 0) {
+        for (const order of currentOrders) {
+          if (totalfilledQty < quantity) {
+            const qtyToFill = Math.min(
+              quantity - totalfilledQty,
+              order.quantity
+            );
+            order.quantity -= qtyToFill;
+            totalfilledQty += qtyToFill;
 
+            if (order.quantity === 0) {
+              currentTopPrice += 0.5;
+            }
+          }
+        }
+      } else {
+        currentTopPrice += 0.5;
+      }
+
+      topPrice = currentTopPrice;
+      if (side === "yes") {
+        orderbook.topYesPrice = topPrice;
+        orderbook.topNoPrice = 10 - topPrice;
+      } else {
+        orderbook.topNoPrice = topPrice;
+        orderbook.topYesPrice = 10 - topPrice;
+      }
+      const oldOppTop = opposingTopPrice;
+      const newTopOpposing =
+        side === "yes" ? orderbook.topNoPrice : orderbook.topYesPrice;
+
+      if (newTopOpposing < oldOppTop) {
+        for (
+          let price = oldOppTop - 0.5;
+          price >= newTopOpposing;
+          price -= 0.5
+        ) {
+          const matchingOrder = orderbook[opposingSide].find(
+            (order) => order.price === price
+          );
+          if (matchingOrder) {
+            matchingOrder.quantity = Math.floor(Math.random() * 100) + 1;
+          }
+        }
+      }
+
+      console.log(
+        `Updated top prices: ${side} = ${topPrice}, ${opposingSide} = ${
+          10 - topPrice
+        }`
+      );
+    }
+    WebsocketServer.broadcast(orderbook.eventId, {
+      orderbook,
+    });
+    await updateOrderbookAfterBid(orderbook);
+  }
+}
 
 // export const processOrder = (
 //   side: "yes" | "no",
@@ -91,14 +166,14 @@ export async function processOrder(side : "yes"|"no", price : number, quantity :
 // ) => {
 
 //   if (side === "yes") {
- 
+
 //     if (price < orderBook.topYesPrice) {
 //       return {
 //         success: false,
 //         message: "Invalid request: Price is lower than the top price for Yes.",
 //       };
 //     }
-   
+
 //     let remainingQty = quantity;
 //     let currentPrice = orderBook.topYesPrice;
 
@@ -109,38 +184,33 @@ export async function processOrder(side : "yes"|"no", price : number, quantity :
 //         currentOrder.quantity -= qtyToFill;
 //         remainingQty -= qtyToFill;
 
-       
 //         if (currentOrder.quantity === 0) {
 //           currentPrice += 0.5;
 //         }
 //       } else {
-//         currentPrice += 0.5; 
+//         currentPrice += 0.5;
 //       }
 //     }
 
-    
 //     const nextTopYes = orderBook.yes.find((order) => order.quantity > 0);
 //     if (nextTopYes) {
 //       orderBook.topYesPrice = nextTopYes.price;
 //     } else {
-//       orderBook.topYesPrice = 9.5; 
+//       orderBook.topYesPrice = 9.5;
 //     }
 
-    
 //     orderBook.topNoPrice = 10 - orderBook.topYesPrice;
-
-  
 
 //     return { success: true };
 //   } else if (side === "no") {
-    
+
 //     if (price < orderBook.topNoPrice) {
 //       return {
 //         success: false,
 //         message: "Invalid request: Price is lower than the top price for No.",
 //       };
 //     }
-    
+
 //     let remainingQty = quantity;
 //     let currentPrice = orderBook.topNoPrice;
 
@@ -151,31 +221,27 @@ export async function processOrder(side : "yes"|"no", price : number, quantity :
 //         currentOrder.quantity -= qtyToFill;
 //         remainingQty -= qtyToFill;
 
-       
 //         if (currentOrder.quantity === 0) {
 //           currentPrice += 0.5;
 //         }
 //       } else {
-//         currentPrice += 0.5; 
+//         currentPrice += 0.5;
 //       }
 //     }
 
-    
 //     const nextTopNo = orderBook.no.find((order) => order.quantity > 0);
 //     if (nextTopNo) {
 //       orderBook.topNoPrice = nextTopNo.price;
 //     } else {
-//       orderBook.topNoPrice = 9.5; 
+//       orderBook.topNoPrice = 9.5;
 //     }
 
-    
 //     orderBook.topYesPrice = 10 - orderBook.topNoPrice;
 
-  
 //     return { success: true };
 //   }
 // };
-  
+
 //   const topYes = orderBook.yes.find(
 //     (order) => order.price === orderBook.topYesPrice
 //   );
@@ -211,9 +277,9 @@ export async function processOrder(side : "yes"|"no", price : number, quantity :
 //         broadcastPortfolio();
 //         const newTopNo = orderBook.no.find(order => order.price === orderBook.topNoPrice);
 //         if (newTopNo) {
-//           newTopNo.quantity = Math.floor(Math.random() * 100) + 1; 
+//           newTopNo.quantity = Math.floor(Math.random() * 100) + 1;
 //         }
-       
+
 //       }
 
 //       broadcastOrderBook(orderBook);
@@ -249,7 +315,7 @@ export async function processOrder(side : "yes"|"no", price : number, quantity :
 //         broadcastPortfolio()
 //         const newTopYes = orderBook.yes.find(order => order.price === orderBook.topYesPrice);
 //         if (newTopYes) {
-//           newTopYes.quantity = Math.floor(Math.random() * 100) + 1; 
+//           newTopYes.quantity = Math.floor(Math.random() * 100) + 1;
 //         }
 //         ;
 //       }
@@ -271,7 +337,6 @@ export async function processOrder(side : "yes"|"no", price : number, quantity :
 //     noProb,
 //   };
 // };
-
 
 // export const getPortfolio = () => {
 //   if (!userPortfolio.side || userPortfolio.initialPrice === null) {

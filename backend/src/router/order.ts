@@ -18,7 +18,7 @@ router.post("/place-order", async (req, res) => {
   try {
     const orderbook = await prisma.orderBook.findUnique({
       where: {
-        id: eventId,
+        eventId : eventId
       },
       include: {
         yes: true,
@@ -29,7 +29,7 @@ router.post("/place-order", async (req, res) => {
     if (!orderbook) {
       return res.status(403).json({
         message:
-          "no orderbook found for this event(event closed or doesn't exists",
+          "no orderbook found for this event(event closed or doesn't exists)",
       });
     }
     if (
