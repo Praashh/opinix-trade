@@ -21,14 +21,21 @@ import graph from "../assets/graph.png";
 const LandingPage: React.FC = () => {
   return (
     <div className="bg-bg">
-      <LandingNavbar/>
+      <LandingNavbar />
       <HeroSection />
 
-      <div className="w-screen">
-        <img src={bgGradient} alt="" className="w-full absolute top-[100px]" />
-        <div className="relative flex justify-center top-[200px]">
-          <div className="p-3 border border-gray rounded-xl w-[1000px]">
-            <img src={dashboard} alt="" className="rounded-xl" />
+      <div className="relative w-screen">
+        {/* Background Image with better responsiveness */}
+        <img
+          src={bgGradient}
+          alt=""
+          className="w-full h-auto absolute inset-0 object-cover"
+        />
+
+        {/* Main content area */}
+        <div className="relative flex justify-center items-center min-h-screen z-10">
+          <div className="p-3 border border-gray-300 rounded-xl max-w-[1000px] w-full">
+            <img src={dashboard} alt="" className="rounded-xl w-full h-auto" />
           </div>
         </div>
       </div>
@@ -152,8 +159,7 @@ const LandingPage: React.FC = () => {
         </div>
       </div>
 
-
-      <Footer/>
+      <Footer />
     </div>
   );
 };

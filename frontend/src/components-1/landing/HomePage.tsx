@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
-import { Button } from "../ui/button";
+import { Button } from "../../components/ui/button";
 import { eventData } from "@/lib/event-data";
-import { EventCard } from "../ui/EventCard";
+import { EventCard } from "../../components/ui/EventCard";
 import { useNavigate } from "react-router-dom";
 
 export default function HomePage() {

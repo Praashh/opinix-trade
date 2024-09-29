@@ -1,5 +1,5 @@
 import { eventData } from '@/lib/event-data';
-import { EventCard } from "../ui/EventCard";
+import { EventCard } from "../../components/ui/EventCard";
 
 export default function Home() {
 

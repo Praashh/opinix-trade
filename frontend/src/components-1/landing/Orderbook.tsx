@@ -11,7 +11,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
-import LineChart from "../ui/line-chart";
+import LineChart from "../../components/ui/line-chart";
 import axios from "axios";
 
 interface OrderBookItem {

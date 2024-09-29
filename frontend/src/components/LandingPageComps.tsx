@@ -5,14 +5,11 @@ import { FaInstagram } from "react-icons/fa6";
 import { BsTwitterX } from "react-icons/bs";
 import { FaLinkedin } from "react-icons/fa";
 import bgGradient from "../assets/image.svg";
+import { useState } from "react";
 
 interface ButtonProps {
   text: string;
   onClick: () => void;
-}
-
-interface DashboardImageProps {
-  src: string;
 }
 
 interface TransactionInfoProps {
@@ -41,45 +38,61 @@ interface CustomerReviewProps {
   image: string;
 }
 
-export const LandingNavbar = () =>{
-  return(
-    <div className="w-full h-24 bg-[#05071A] p-5 flex justify-between">
+export const LandingNavbar = () => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  const toggleDropdown = () => {
+    setIsOpen(!isOpen);
+  };
+
+  return (
+    <div className="w-full h-24 bg-[#05071A] p-5 flex justify-between items-center">
       {/* OpinioX Logo */}
-      <div className="text-white font-sora font-semibold text-4xl">
-        OpinioX
+      <div className="text-white font-sora font-semibold text-4xl">OpinioX</div>
+
+      {/* Mobile Menu Toggle */}
+      <div className="sm:hidden">
+        <button onClick={toggleDropdown} className="text-white text-3xl">
+          {isOpen ? " ☰ " : " ☰ "} {/* Simple toggle icon */}
+        </button>
       </div>
 
-      <div className="flex items-center space-x-4 pr-10">
-        <div className="text-gray font-sora">
-          Features
-        </div>
-
-        <div className="text-gray font-sora">
-          Reviews
-        </div>
-
-        <div className="text-gray font-sora">
-          FAQ's
-        </div>
-      </div>
-      
-
-      <button className="w-[160px] h-[40px] bg-gradient-to-r from-[#212635] to-[#191B25] rounded font-sora font-semibold text-md text-white">
+      {/* Desktop Menu */}
+      <div className="hidden sm:flex items-center space-x-4 pr-10">
+        <div className="text-gray font-sora">Features</div>
+        <div className="text-gray font-sora">Reviews</div>
+        <div className="text-gray font-sora">FAQ's</div>
+        {/* Sign Up Button */}
+        <button className="w-[160px] h-[40px] bg-gradient-to-r from-[#212635] to-[#191B25] rounded font-sora font-semibold text-md text-white">
           SIGN UP
         </button>
+      </div>
+
+      {/* Mobile Dropdown Menu */}
+      {isOpen && (
+        <div className="absolute top-24 left-0 w-full bg-[#05071A] p-5 flex flex-col space-y-2 md:hidden">
+          <div className="text-gray font-sora">Features</div>
+          <div className="text-gray font-sora">Reviews</div>
+          <div className="text-gray font-sora">FAQ's</div>
+          {/* Sign Up Button */}
+          <button className="w-[160px] h-[40px] bg-gradient-to-r from-[#212635] to-[#191B25] rounded font-sora font-semibold text-md text-white">
+            SIGN UP
+          </button>
+        </div>
+      )}
     </div>
-  )
-} 
+  );
+};
 
 export const HeroSection: React.FC = () => (
-  <div className="flex flex-col pt-[150px] items-center justify-center">
+  <div className="flex flex-col items-center justify-center sm:h-screen">
     <div className="text-gray font-extralight font-sora text-center px-3 py-1 rounded-full shadow-[inset_-10px_-10px_30px_rgba(28,36,76,0.5),_inset_10px_10px_40px_rgba(28,36,76,0.5)]">
       Mobile app available. Download now.
     </div>
-    <div className="text-white font-sora text-6xl text-center mt-14">
+    <div className="text-white font-sora text-6xl text-center mt-14 px-5">
       Trade Your Opinion using <br /> OpiniX
     </div>
-    <div className="text-gray font-sora mt-3 w-1/2 text-center">
+    <div className="text-gray font-sora mt-3 text-center px-5 md:w-1/2">
       Join a dynamic platform where you can predict outcomes, buy and sell
       shares on various events, and profit from your insights. Turn your
       opinions into real value and engage in real-time markets today!
@@ -99,24 +112,13 @@ export const Button: React.FC<ButtonProps> = ({ text, onClick }) => (
   </button>
 );
 
-export const DashboardImage: React.FC<DashboardImageProps> = ({ src }) => (
-  <div className="w-screen">
-    <img src={src} alt="" className="w-full absolute top-[100px]" />
-    <div className="relative flex justify-center top-[200px]">
-      <div className="p-3 border border-gray rounded-xl w-[1000px]">
-        <img src={src} alt="" className="rounded-xl" />
-      </div>
-    </div>
-  </div>
-);
-
 export const TransactionInfo: React.FC<TransactionInfoProps> = ({
   icon,
   title,
   description,
 }) => (
   <div className="p-5 rounded-xl shadow-[inset_-10px_-10px_30px_rgba(28,36,76,0.5),_inset_10px_10px_40px_rgba(28,36,76,0.5)]">
-    <div className="flex justify-center mt-5">
+    <div className="flex justify-center mt-5 sm:grid grid-cols-1">
       <div className="w-14 h-14 bg-[#101636] rounded-full">
         <img src={icon} alt="" className="w-10 h-10 mt-2 ml-2" />
       </div>
@@ -220,7 +222,10 @@ export const CustomerReview: React.FC<CustomerReviewProps> = ({
 
 export const Footer = () => {
   return (
-    <div className="relative px-20 mt-20 pb-20 bg-cover bg-top" style={{ backgroundImage: `url(${bgGradient}),` }}>
+    <div
+      className="relative px-20 mt-20 pb-20 bg-cover bg-top"
+      style={{ backgroundImage: `url(${bgGradient}),` }}
+    >
       <div className="flex gap-10">
         <div className="text-white font-sora text-2xl">OpinioX</div>
         <div className="h-8 w-0.5 bg-white"></div>
