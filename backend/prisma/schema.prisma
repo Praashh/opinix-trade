@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -12,27 +6,29 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
 model User {
   id          String     @id @default(cuid())
-  email       String?    @unique //using  google auth
-  phoneNumber String     @unique // using phonenumber
+  phoneNumber String     @unique
   balance     Float      @default(0.0)
   role        UserRole
   createdAt   DateTime   @default(now())
+  updatedAt   DateTime
+  Event       Event[]
+  OTP         OTP[]
+  Payout      Payout[]
   portfolio   Portfolio?
   events      Event[]    @relation("EventParticipants")
-  Event       Event[]
-  Payout      Payout[]
 }
 
 model Portfolio {
   id              String   @id @default(cuid())
   userId          String   @unique
-  user            User     @relation(references: [id], fields: [userId])
-  trades          Trade[]
   currentBalances Float    @default(0.0)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
+  user            User     @relation(fields: [userId], references: [id])
+  trades          Trade[]
 }
 
 model Event {
@@ -40,63 +36,75 @@ model Event {
   title        String
   description  String
   adminId      String
-  admin        User        @relation(fields: [adminId], references: [id])
   status       EventStatus @default(ONGOING)
   createdAt    DateTime    @default(now())
   updatedAt    DateTime    @updatedAt
-  orderBook    OrderBook? // Each event has one order book
-  participants User[]      @relation("EventParticipants")
+  admin        User        @relation(fields: [adminId], references: [id])
+  orderBook    OrderBook?
   Trade        Trade[]
+  participants User[]      @relation("EventParticipants")
 }
 
 model OrderBook {
   id          String     @id @default(cuid())
   eventId     String     @unique
-  event       Event      @relation(references: [id], fields: [eventId])
   topPriceYes Float
   topPriceNo  Float
-  yes         YesOrder[]
   no          NoOrder[]
+  event       Event      @relation(fields: [eventId], references: [id])
+  yes         YesOrder[]
 }
 
 model YesOrder {
   id          String    @id @default(cuid())
   orderBookId String
-  orderBook   OrderBook @relation(fields: [orderBookId], references: [id])
   price       Float
   quantity    Int
+  status      OrderStatus
   createdAt   DateTime  @default(now())
+  orderBook   OrderBook @relation(fields: [orderBookId], references: [id])
 }
 
 model NoOrder {
   id          String    @id @default(cuid())
   orderBookId String
-  orderBook   OrderBook @relation(fields: [orderBookId], references: [id])
   price       Float
   quantity    Int
+  status      OrderStatus
   createdAt   DateTime  @default(now())
+  orderBook   OrderBook @relation(fields: [orderBookId], references: [id])
 }
 
 model Trade {
   id          String    @id @default(cuid())
   portfolioId String
-  portfolio   Portfolio @relation(fields: [portfolioId], references: [id])
   eventId     String
-  event       Event     @relation(fields: [eventId], references: [id])
   price       Float
   quantity    Int
   side        TradeSide
   createdAt   DateTime  @default(now())
+  event       Event     @relation(fields: [eventId], references: [id])
+  portfolio   Portfolio @relation(fields: [portfolioId], references: [id])
 }
 
 model Payout {
   id        String       @id @default(cuid())
   userId    String
-  user      User         @relation(references: [id], fields: [userId])
   amount    Float
   status    PayoutStatus
   createdAt DateTime     @default(now())
   updatedAt DateTime     @updatedAt
+  user      User         @relation(fields: [userId], references: [id])
+}
+
+model OTP {
+  id        String   @id
+  userId    String
+  otp       String   @unique
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+  otpID     String
+  User      User     @relation(fields: [userId], references: [id])
 }
 
 enum UserRole {
@@ -118,4 +126,9 @@ enum PayoutStatus {
   PENDING
   COMPLETED
   FAILED
+}
+enum OrderStatus {
+  PENDING
+  PLACED
+
 }
