@@ -21,6 +21,6 @@ export const WebsocketServer = setupwebsocket(server);
 server.listen(3000, () => {
   console.log(`Server is running on http://localhost:3000`);
 });
- setInterval(async () => {
-   await updateOrderBook();
- }, 30000);
+//  setInterval(async () => {
+//    await updateOrderBook();
+//  }, 30000);
