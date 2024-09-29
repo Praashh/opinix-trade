@@ -60,6 +60,7 @@ model YesOrder {
   orderBookId String
   price       Float
   quantity    Int
+  status      OrderStatus
   createdAt   DateTime  @default(now())
   orderBook   OrderBook @relation(fields: [orderBookId], references: [id])
 }
@@ -69,6 +70,7 @@ model NoOrder {
   orderBookId String
   price       Float
   quantity    Int
+  status      OrderStatus
   createdAt   DateTime  @default(now())
   orderBook   OrderBook @relation(fields: [orderBookId], references: [id])
 }
@@ -124,4 +126,9 @@ enum PayoutStatus {
   PENDING
   COMPLETED
   FAILED
+}
+enum OrderStatus {
+  PENDING
+  PLACED
+
 }
