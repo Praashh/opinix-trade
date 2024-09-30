@@ -85,20 +85,30 @@ export const LandingNavbar = () => {
 };
 
 export const HeroSection: React.FC = () => (
-  <div className="flex flex-col items-center justify-center min-h-screen bg-[#05071A] text-center px-4">
-    <div className="text-gray font-extralight font-sora px-3 py-1 rounded-full shadow-[inset_-10px_-10px_30px_rgba(28,36,76,0.5),_inset_10px_10px_40px_rgba(28,36,76,0.5)]">
-      Mobile app available. Download now.
-    </div>
-    <h1 className="text-white font-sora text-6xl mt-14 mb-4">
-      Trade Your Opinion using <br /> OpiniX
-    </h1>
-    <p className="text-gray font-sora mb-8 max-w-2xl">
-      Join a dynamic platform where you can predict outcomes, buy and sell
-      shares on various events, and profit from your insights. Turn your
-      opinions into real value and engage in real-time markets today!
-    </p>
-    <Button text="Get Started" onClick={() => {}} />
-  </div>
+  <div className="flex flex-col items-center justify-center">
+        <div
+          className="text-gray font-extralight font-sora text-center px-3 py-1 rounded-full
+        shadow-[inset_-10px_-10px_30px_rgba(28,36,76,0.5),_inset_10px_10px_40px_rgba(28,36,76,0.5)]"
+        >
+          Mobile app available. Download now.
+        </div>
+        <div className="text-white font-sora text-7xl text-center mt-14">
+          Trade Your Opinion using <br /> OpiniX
+        </div>
+        <div className="text-gray font-sora mt-3 w-1/2 text-center">
+          Join a dynamic platform where you can predict outcomes, buy and sell
+          shares on various events, and profit from your insights. Turn your
+          opinions into real value and engage in real-time markets today!
+        </div>
+        <button
+          onClick={() => {}}
+          className="bg-blue-500 text-white font-semibold rounded-[10px] font-sora px-5 py-3 m-8"
+        >
+          <span className="flex gap-2">
+            Get Started <MdArrowOutward className="text-xl" />
+          </span>
+        </button>
+      </div>
 );
 
 
@@ -224,33 +234,33 @@ export const CustomerReview: React.FC<CustomerReviewProps> = ({
 export const Footer = () => {
   return (
     <div
-      className="relative px-20 mt-20 pb-20 bg-cover bg-top"
+      className="relative px-4 sm:px-8 md:px-20 mt-10 sm:mt-16 md:mt-20 pb-10 sm:pb-16 md:pb-20 bg-cover bg-top"
       style={{ backgroundImage: `url(${bgGradient}),` }}
     >
-      <div className="flex gap-10">
-        <div className="text-white font-sora text-2xl">OpinioX</div>
-        <div className="h-8 w-0.5 bg-white"></div>
-        <div className="text-gray font-sora text-sm mt-2">
+      <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 md:gap-10 items-center sm:items-start">
+        <div className="text-white font-sora text-xl sm:text-2xl">OpinioX</div>
+        <div className="hidden sm:block h-8 w-0.5 bg-white"></div>
+        <div className="text-gray font-sora text-sm text-center sm:text-left sm:mt-2">
           Trade your opinion using OpiniX
         </div>
       </div>
-
-      <div className="w-full h-0.5 bg-gray mt-10"></div>
-
-      <div className="flex justify-between p-5">
-        <div>
-          <div className="text-gray font-sora text-sm">
+      
+      <div className="w-full h-0.5 bg-gray mt-6 sm:mt-8 md:mt-10"></div>
+      
+      <div className="flex flex-col sm:flex-row justify-between items-center sm:items-start gap-4 sm:gap-0 pt-6 sm:pt-5">
+        <div className="text-center sm:text-left">
+          <div className="text-gray font-sora text-xs sm:text-sm">
             Copyright 2024 OpinioX.
           </div>
-          <div className="text-gray font-sora text-sm">
+          <div className="text-gray font-sora text-xs sm:text-sm">
             All Rights Reserved.
           </div>
         </div>
-        <div className="flex gap-10">
+        <div className="flex gap-6 sm:gap-8 md:gap-10">
           <CiFacebook className="text-white h-5 w-5" />
-          <FaInstagram className="text-white" />
-          <BsTwitterX className="text-white" />
-          <FaLinkedin className="text-white" />
+          <FaInstagram className="text-white h-5 w-5" />
+          <BsTwitterX className="text-white h-5 w-5" />
+          <FaLinkedin className="text-white h-5 w-5" />
         </div>
       </div>
     </div>
