@@ -77,3 +77,43 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+.gradient-text {
+  background: linear-gradient(
+    to right,
+    #a855f7,
+    #3178c6,
+    #b51d1d,
+    #3178c6,
+    #a855f7,
+    #3178c6,
+    #b51d1d
+  );
+  background-size: 300% 300%;
+  background-clip: text;
+}
+
+.gradient-border-left {
+  border-radius: 2rem;
+  border: 2px solid;
+  border-image: linear-gradient(
+    to right,
+    white,
+    rgb(37, 36, 38),
+    rgb(233, 219, 237)
+  );
+  border-image-slice: 1;
+  border-image-width: 1 0 1 1;
+}
+.gradient-border-right {
+  border-radius: 2rem;
+  border: 2px solid;
+  border-image: linear-gradient(
+    to right,
+    white,
+    rgb(37, 36, 38),
+    rgb(233, 219, 237)
+  );
+  border-image-slice: 1;
+  border-image-width: 1 1 1 0;
+}

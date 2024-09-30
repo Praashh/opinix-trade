@@ -1,11 +1,10 @@
-import { Button } from "@/components/ui/button";
-import { ModeToggle } from "@/components/ui/mode-toggle";
-import Image from "next/image";
+"use client"
+import {HomeComponent} from "./components/Home"
 
-export default function Home() {
+export default function Page() {
   return (
-  <>
-    <ModeToggle/>
-  </>
+    <>
+      <HomeComponent/>
+    </>
   );
 }

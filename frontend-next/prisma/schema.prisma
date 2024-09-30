@@ -19,6 +19,7 @@ model User {
   events      Event[]    @relation("EventParticipants")
   Event       Event[]
   Payout      Payout[]
+  otp         OTP[]
 }
 
 model Portfolio {
@@ -93,6 +94,17 @@ model Payout {
   status    PayoutStatus
   createdAt DateTime     @default(now())
   updatedAt DateTime     @updatedAt
+}
+
+model OTP {
+  id              String   @id @default(uuid())
+  otpID           String   @unique
+  otp             String   @unique
+  createdAt       DateTime @default(now())
+  expiresAt       DateTime
+  isVerified      Boolean  @default(false)
+  user            User?     @relation(fields: [userId], references: [id])
+  userId          String?
 }
 
 enum UserRole {
