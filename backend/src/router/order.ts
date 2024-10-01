@@ -1,24 +1,37 @@
 import { Router } from "express";
 import prisma from "../utils/db";
 import {
+  incomingOrder,
   OrderbookForOrders,
   OrderStatus,
-  processOrder,
 } from "../utils/marketMaker";
 
 const router = Router();
 
 router.post("/place-order", async (req, res) => {
-  const { eventId, side, quantity, price } = req.body;
+  const { userId, eventId, side, quantity, price } = req.body;
 
-  if (!eventId || !["yes", "no"].includes(side) || !quantity || !price) {
+  if (
+    !userId ||
+    !eventId ||
+    !["yes", "no"].includes(side) ||
+    !quantity ||
+    !price
+  ) {
     return res.status(400).json({ error: "Invalid order data" });
   }
-
+  const user = await prisma.user.findUnique({
+    where: {
+      id: userId,
+    },
+  });
+  if (!user) {
+    return res.status(400).json({ message: "No user found" });
+  }
   try {
     const orderbook = await prisma.orderBook.findUnique({
       where: {
-        eventId : eventId
+        eventId: eventId,
       },
       include: {
         yes: true,
@@ -64,11 +77,11 @@ router.post("/place-order", async (req, res) => {
       })),
     };
 
-    const result = processOrder(side, price, quantity, typedOrderbook);
+    await incomingOrder(userId,side, price, quantity, typedOrderbook);
 
     return res
       .status(200)
-      .json({ message: "Order processed successfully", result });
+      .json({ message: "Order processed successfully"});
   } catch (e) {
     console.log("Error placing order", e);
     res.status(500).json({ error: "Internal Server Error" });
