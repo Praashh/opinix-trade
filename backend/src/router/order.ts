@@ -1,9 +1,9 @@
 import { Router } from "express";
 import prisma from "../utils/db";
 import {
+  incomingOrder,
   OrderbookForOrders,
   OrderStatus,
-  processOrder,
 } from "../utils/marketMaker";
 
 const router = Router();
@@ -77,7 +77,7 @@ router.post("/place-order", async (req, res) => {
       })),
     };
 
-    const result = processOrder(userId,side, price, quantity, typedOrderbook);
+    await incomingOrder(userId,side, price, quantity, typedOrderbook);
 
     return res
       .status(200)

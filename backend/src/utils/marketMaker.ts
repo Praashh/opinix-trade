@@ -81,6 +81,53 @@ export interface OrderbookForOrders {
   no: NoOrder[];
 }
 
+export async function incomingOrder(
+  userId: string,
+  side: "yes" | "no",
+  price: number,
+  quantity: number,
+  orderbook: OrderbookForOrders
+) {
+  await queuePlacedOrder(userId, side, price, quantity);
+  await executePlacedOrder(orderbook);
+}
+export async function queuePlacedOrder(
+  userId: string,
+  side: "yes" | "no",
+  price: number,
+  quantity: number
+) {
+  const order = JSON.stringify({ userId, side, price, quantity });
+  await redisClient.lpush("placedOrderQueue", order);
+  console.log(`Placed order queued: ${order}`);
+}
+
+export async function executePlacedOrder(orderbook: OrderbookForOrders) {
+  let order = await redisClient.rpop("placedOrderQueue");
+  while (order) {
+    const parsedOrder = JSON.parse(order);
+    const topPrice =
+      parsedOrder.side === "yes" ? orderbook.topYesPrice : orderbook.topNoPrice;
+    if (topPrice > parsedOrder.price) {
+      await queueOrder(
+        parsedOrder.userId,
+        parsedOrder.side,
+        parsedOrder.price,
+        parsedOrder.quantity
+      );
+    } else {
+      await processOrder(
+        parsedOrder.userId,
+        parsedOrder.side,
+        parsedOrder.price,
+        parsedOrder.quantity,
+        orderbook
+      );
+    }
+    order = await redisClient.rpop("placedOrderQueue");
+  }
+}
+
 export async function processOrder(
   userId: string,
   side: "yes" | "no",
