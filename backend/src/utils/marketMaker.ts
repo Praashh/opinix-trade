@@ -191,6 +191,7 @@ export async function processOrder(
       );
     }
     await updateOrderbookAfterBid(orderbook);
+
     WebsocketServer.broadcast(orderbook.eventId, {
       orderbook,
     });
@@ -228,11 +229,11 @@ async function queueOrder(
   quantity: number
 ) {
   const order = JSON.stringify({ userId, side, price, quantity });
-  await redisClient.lPush("orderQueue", order);
+  await redisClient.lpush("orderQueue", order);
   console.log(`Order queued: ${order}`);
 }
 async function checkAndExecuteQueueOrders(orderbook: OrderbookForOrders) {
-  let order = await redisClient.rPop("orderQueue");
+  let order = await redisClient.rpop("orderQueue");
   while (order) {
     console.log(`Popped order from queue: ${order}`);
     const parsedOrder = JSON.parse(order);
@@ -247,9 +248,9 @@ async function checkAndExecuteQueueOrders(orderbook: OrderbookForOrders) {
         orderbook
       );
     } else {
-      redisClient.lPush("orderQueue", order);
+      redisClient.lpush("orderQueue", order);
     }
-    order = await redisClient.rPop("orderQueue");
+    order = await redisClient.rpop("orderQueue");
   }
 }
 
