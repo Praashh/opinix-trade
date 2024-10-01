@@ -81,7 +81,7 @@ router.post("/place-order", async (req, res) => {
 
     return res
       .status(200)
-      .json({ message: "Order processed successfully", result });
+      .json({ message: "Order processed successfully"});
   } catch (e) {
     console.log("Error placing order", e);
     res.status(500).json({ error: "Internal Server Error" });

@@ -1,3 +1,4 @@
+import { redisClient } from "../redis/redisClient";
 import { WebsocketServer } from "../router/websockets";
 
 import { updateOrderbookAfterBid } from "../services/updateOrderBookForBids";
@@ -94,6 +95,7 @@ export async function processOrder(
   let totalfilledQty = 0;
   orderBook[side].sort((a, b) => a.price - b.price);
   if (price < topPrice) {
+    await queueOrder(userId, side, price, quantity);
     return;
   } else {
     const user = await prisma.user.findUnique({
@@ -192,6 +194,10 @@ export async function processOrder(
     WebsocketServer.broadcast(orderbook.eventId, {
       orderbook,
     });
+    await checkAndExecuteQueueOrders(orderbook);
+    WebsocketServer.broadcast(orderbook.eventId, {
+      orderbook,
+    });
     const allTrades = await prisma.trade.findMany({
       where: {
         eventId: orderbook.eventId,
@@ -215,6 +221,38 @@ export async function processOrder(
     }
   }
 }
+async function queueOrder(
+  userId: string,
+  side: "yes" | "no",
+  price: number,
+  quantity: number
+) {
+  const order = JSON.stringify({ userId, side, price, quantity });
+  await redisClient.lPush("orderQueue", order);
+  console.log(`Order queued: ${order}`);
+}
+async function checkAndExecuteQueueOrders(orderbook: OrderbookForOrders) {
+  let order = await redisClient.rPop("orderQueue");
+  while (order) {
+    console.log(`Popped order from queue: ${order}`);
+    const parsedOrder = JSON.parse(order);
+    const topPrice =
+      parsedOrder.side === "yes" ? orderbook.topYesPrice : orderbook.topNoPrice;
+    if (parsedOrder.price >= topPrice) {
+      await processOrder(
+        parsedOrder.userId,
+        parsedOrder.side,
+        parsedOrder.price,
+        parsedOrder.quantity,
+        orderbook
+      );
+    } else {
+      redisClient.lPush("orderQueue", order);
+    }
+    order = await redisClient.rPop("orderQueue");
+  }
+}
+
 // export const processOrder = (
 //   side: "yes" | "no",
 //   quantity: number,
