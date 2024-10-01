@@ -1,6 +1,7 @@
 import { WebsocketServer } from "../router/websockets";
 
 import { updateOrderbookAfterBid } from "../services/updateOrderBookForBids";
+import prisma from "./db";
 
 interface Order {
   price: number;
@@ -80,6 +81,7 @@ export interface OrderbookForOrders {
 }
 
 export async function processOrder(
+  userId: string,
   side: "yes" | "no",
   price: number,
   quantity: number,
@@ -94,6 +96,45 @@ export async function processOrder(
   if (price < topPrice) {
     return;
   } else {
+    const user = await prisma.user.findUnique({
+      where: {
+        id: userId,
+      },
+    });
+    const cost = price * quantity;
+    if (user) {
+      if (user?.balance < cost) {
+        throw new Error("Insufficient balance.");
+      }
+      await prisma.user.update({
+        where: { id: userId },
+        data: { balance: user.balance - cost },
+      });
+    }
+
+    let portfolio = await prisma.portfolio.findUnique({
+      where: {
+        userId: userId,
+      },
+    });
+    if (!portfolio) {
+      portfolio = await prisma.portfolio.create({
+        data: {
+          userId: userId,
+        },
+      });
+    }
+
+    const tradeSide = side === "yes" ? "YES" : "NO";
+    await prisma.trade.create({
+      data: {
+        portfolioId: portfolio?.id,
+        eventId: orderbook.eventId,
+        price: Number(price),
+        quantity: Number(quantity),
+        side: tradeSide,
+      },
+    });
     let currentTopPrice = topPrice;
     while (totalfilledQty < quantity && currentTopPrice <= 9.5) {
       const currentOrders = orderbook[side].filter(
@@ -151,6 +192,27 @@ export async function processOrder(
     WebsocketServer.broadcast(orderbook.eventId, {
       orderbook,
     });
+    const allTrades = await prisma.trade.findMany({
+      where: {
+        eventId: orderbook.eventId,
+      },
+    });
+    for (const trade of allTrades) {
+      const currentPrice =
+        side === "yes" ? orderbook.topYesPrice : orderbook.topNoPrice;
+      const gainloss = (currentPrice - trade.price) * trade.quantity;
+
+      await prisma.portfolio.update({
+        where: {
+          id: trade.portfolioId,
+        },
+        data: {
+          currentBalances: {
+            increment: gainloss,
+          },
+        },
+      });
+    }
   }
 }
 // export const processOrder = (

@@ -9,16 +9,29 @@ import {
 const router = Router();
 
 router.post("/place-order", async (req, res) => {
-  const { eventId, side, quantity, price } = req.body;
+  const { userId, eventId, side, quantity, price } = req.body;
 
-  if (!eventId || !["yes", "no"].includes(side) || !quantity || !price) {
+  if (
+    !userId ||
+    !eventId ||
+    !["yes", "no"].includes(side) ||
+    !quantity ||
+    !price
+  ) {
     return res.status(400).json({ error: "Invalid order data" });
   }
-
+  const user = await prisma.user.findUnique({
+    where: {
+      id: userId,
+    },
+  });
+  if (!user) {
+    return res.status(400).json({ message: "No user found" });
+  }
   try {
     const orderbook = await prisma.orderBook.findUnique({
       where: {
-        eventId : eventId
+        eventId: eventId,
       },
       include: {
         yes: true,
@@ -64,7 +77,7 @@ router.post("/place-order", async (req, res) => {
       })),
     };
 
-    const result = processOrder(side, price, quantity, typedOrderbook);
+    const result = processOrder(userId,side, price, quantity, typedOrderbook);
 
     return res
       .status(200)
