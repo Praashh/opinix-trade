@@ -14,7 +14,6 @@ interface Event {
   avatar: string;
   yesPrice: number;
   noPrice: number;
-  eventLink: string;
 }
 
 interface EventCardProps {
@@ -33,7 +32,7 @@ const EventCard = ({ event }: EventCardProps) => (
           />
         </Avatar>
         <div className="flex-grow">
-          <Link href={event.eventLink}>
+          <Link href={`/event/${event.id}`}>
             <h3 className="font-semibold text-sm">{event.title}</h3>
           </Link>
           <Badge variant="secondary" className="mt-1 text-xs bg-[#854D0E]">
