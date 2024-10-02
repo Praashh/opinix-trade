@@ -6,19 +6,14 @@ This project is a real-time opinion trading platform where users can place bets 
 
 ## Table of Contents
 
- 1. [Introduction](#introduction)
- 2. [Architecture](#architecture)
- 3. [Current Features](#current-features)
- 4. [Future Steps](#future-steps)
- 5. [Setup Instructions](#setup-instructions)
- 6. [Demo](#Demo)
- <!-- 3. [Tech Stack](#tech-stack) -->
-
----
-
-## Introduction
-
-This platform allows users to engage in opinion trading, where they can bet on different outcomes in real time. It handles the matching of orders, updates strike prices dynamically, and broadcasts live changes to all connected users.
+- [Opinix Trade](#opinix-trade)
+  - [Table of Contents](#table-of-contents)
+  - [Architecture](#architecture)
+  - [User Architecture Diagram:](#user-architecture-diagram)
+  - [Admin Architecture Diagram](#admin-architecture-diagram)
+  - [Components:](#components)
+  - [Current Features](#current-features)
+  - [Future Steps](#future-steps)
 
 ---
 
@@ -55,33 +50,6 @@ The system is designed to handle real-time updates and asynchronous order proces
    - Ensures that users always have the latest information and that their views are synchronized across all sessions.
 
 ---
-<!-- 
-## Tech Stack
-
-- **Frontend:**
-  - React Native (for mobile application)
-  - NextJS (for web applicaiton)
-  - WebSocket (for real-time communication)
-  
-- **Backend:**
-  - Node.js with Express
-  
-- **Database:**
-  - PostgreSQL for persistent storage of order data
-  
-- **Queue:**
-  - Redis Queue (RQ) for asynchronous order processing (planned)
-  
-- **Real-time Communication:**
-  - WebSocket for live updates on the order book
-  
-- **Authentication:**
-  - NextAuth.js (planned) for secure authentication
-  
-- **Payments:**
-  - Stripe / Razorpay (planned) for payment integration
-
---- -->
 
 ## Current Features
 
@@ -111,86 +79,3 @@ The system is designed to handle real-time updates and asynchronous order proces
    - A worker system handles adding and matching orders in the order book, ensuring smooth operation and avoiding race conditions.
 
 ---
-
-## Setup Instructions
-
-### Prerequisites:
-
-- Node.js (version 18+)
-
-### Steps to Run the Application:
-
-1. **Clone the repository:**
-
-```
-  git clone https://github.com/<your_username>/offchain-orderbook/
-```
-
-**Note: we have two backends backend-odds and backend-probability**
-
-**backend-odds:** follows the standard order-book implementation using AVLTrees having complexity- O(log(n)).
-
-**backend-probability:** follows the order-book similar probo uses (not a standard).
-
----
-### For backend-odds follows these commands:
-```
-  cd backend-odds
-```
-```
-  npm install
-```
-```
- cp .env.example .env
-```
-**Note: Before running Add env variables in env**
-```
-  npm run dev
-```
-
-### For backend-probability follows these commands:
-```
-  cd backend-probability
-```
-```
-    bun i
-```
-```
-  bun run dev
-```
----
-### For frontend follows these commands:
-```
-  cd frontend
-```
-```
-  npm install
-```
-```
- cp .env.example .env
-```
-**Note: Before running Add env variables in env**
-```
-  npm run dev
-```
----
-## Demo
-
-[![Demo](./frontend/public/logo.png)](https://youtu.be/Figa92BwEpE)
-
-## Backend-Odds Demo:
-
-[![Demo](./frontend/public/home.png)](https://youtu.be/gw22NPb9gtM?si=Ai2Blm95J3d_2wiz)
-
-## Backend-Probability Demo:
-
-[![Demo](./frontend/public/home2.png)](https://youtu.be/Rmi6KaQyETk?si=oacKgwhw5V00zdUK)
-
-
-# TODOs
-
-- [ ] Optimize the algorithm.
-- [ ] Integrate Redis
-- [ ] Implement a better UI.
-- [ ] Proper User and Admin Authentication with DB.
- 
