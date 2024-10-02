@@ -5,7 +5,6 @@ export const events = [
     category: "Youtube",
     avatar:
       "https://pbs.twimg.com/profile_images/1599003507415166977/pRYwiTo3_400x400.jpg",
-    eventLink: "/#",
     yesPrice: 5,
     noPrice: 5,
   },
@@ -16,7 +15,6 @@ export const events = [
     avatar:
       "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSyhX8tULuS51azasH1dCTANHPOyWN3SuIVFQ&s",
     yesPrice: 5,
-    eventLink: "/#",
     noPrice: 5,
   },
   {
@@ -26,7 +24,6 @@ export const events = [
     avatar:
       "https://appxcontent.kaxa.in/paid_course3/2024-09-19-0.309826215873515.png",
     yesPrice: 5,
-    eventLink: "/#",
     noPrice: 5,
   },
   {
@@ -36,7 +33,6 @@ export const events = [
     avatar:
       "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRnvhbqguOtZB8xE8gG_QPJ9suirxo60Fc-kg&s",
     yesPrice: 5,
-    eventLink: "/#",
     noPrice: 5,
   },
   {
@@ -46,7 +42,6 @@ export const events = [
     avatar:
       "https://encrypted-tbn3.gstatic.com/images?q=tbn:ANd9GcRFZwZM2HydAVrV32UfmYItu7LJ_6AgGV5ZudseXiZEO_ug2bTfIk5rxMD2YzhLzsbfjsDKKtcAlW7gPLY5S9Ybd_UAYB-C7xZrEm0QCA",
     yesPrice: 5,
-    eventLink: "/#",
     noPrice: 5,
   },
   {
@@ -56,7 +51,6 @@ export const events = [
     avatar:
       "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRgRwE5c5Im8b2J9ojziEqZ-0I_HGVspLOxRw&s",
     yesPrice: 5,
-    eventLink: "/#",
     noPrice: 5,
   },
   // so on...
