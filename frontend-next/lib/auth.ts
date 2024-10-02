@@ -87,7 +87,7 @@ export const authOptions = {
   callbacks: {
     async signIn({ user, credentials }) {
       console.log("User during signIn:", user);
-      
+
       if (!user.isVerified) {
         // console.log("User not verified");
         return false;
@@ -121,7 +121,7 @@ export const authOptions = {
         session.user.phoneNumber = token.phoneNumber;
         session.user.isVerified = token.isVerified;
         session.user.id = token.id;
-        session.user.balance = token.balance
+        session.user.balance = token.balance;
       }
       return session;
     },
