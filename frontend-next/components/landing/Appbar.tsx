@@ -11,7 +11,7 @@ interface navMenutItemType {
 
 export default function Appbar() {
 
-  const navMenutItem: Array<navMenutItemType> = [{ title: "Trading", link: "/trading" }, { title: "Potfolio", link: "/potfolio" }, { title: "Read", link: "/read" }]
+  const navMenutItem: Array<navMenutItemType> = [{ title: "Events", link: "/event" }, { title: "Potfolio", link: "/potfolio" }, { title: "Recharge", link: "/event/recharge" }]
 
   return (
     <nav className="inset-x-0 top-0 backdrop-blur-2xl z-50 border-y-2 shadow-md sticky">

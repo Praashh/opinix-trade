@@ -19,7 +19,7 @@ import { verifySMSOTPAction } from "@/actions/OTP/validateOtp"
 import { signIn } from "next-auth/react"
 import {Toaster, toast} from "react-hot-toast";
 import { useState } from "react"
-import { redirect, useRouter } from "next/navigation"
+import { useRouter } from "next/navigation"
 import { Loader2 } from "lucide-react"
 
 interface InputOTPFormProps {

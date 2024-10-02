@@ -15,17 +15,27 @@ export function Login() {
     const [isLoading, setIsLoading] = useState<boolean>(false);
     async function handleSubmit() {
         setIsLoading(true);
-
+        console.log("sending.....");
+        
         if (phone.length !== 10) {
             alert("Incorrect Phone!");
             setPhone('')
             return;
         }
         // TODO: not a good way, need to fix it.
-        await sendSMSOTP(`+91${phone}`);
+        console.log(phone);
+        
+        const isOtpSent = await sendSMSOTP(`+91${phone}`);
+        console.log("isOtpSent",isOtpSent);
+        
+        if(isOtpSent.success){
+            alert("sent")
+        }else{
+            alert(isOtpSent)    
+        }
+        console.log("sent");
+        
         setShowOtp(true);
-        setIsLoading(true);
-
     }
     return (
         <div className="w-full lg:grid lg:min-h-[600px] h-screen lg:grid-cols-2 xl:min-h-[800px]">
@@ -37,7 +47,7 @@ export function Login() {
                     <CardContent>
                         {showOtp ? <div className="w-full flex flex-col justify-center items-center">
                             <InputOTPForm phoneNumber={`+91${phone}`}/>
-                        </div> : <> <p className="text-sm text-gray-500 mb-4">We'll send you an OTP</p>
+                        </div> : <> <p className="text-sm text-gray-500 mb-4">We will send you an OTP</p>
                             <div className="flex mb-4">
                                 <Input
                                     className="w-16 mr-2"
