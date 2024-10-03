@@ -1,9 +1,7 @@
-/* eslint-disable @next/next/no-img-element */
-import React from "react";
+"use client";
+import React, { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-
 import { Button } from "@/components/ui/button";
-
 import Link from "next/link";
 import { getEvents } from "@/actions/Event/getEvents";
 
@@ -37,8 +35,17 @@ const EventCard = ({ event }: EventCardProps) => (
   </Card>
 );
 
-export default async function EventList() {
-  const events = await getEvents();
+export default function EventList() {
+  const [events, setEvents] = useState<Event[]>();
+  useEffect(() => {
+    async function fetch() {
+      const evnt = await getEvents();
+      console.log(evnt);
+
+      setEvents(evnt);
+    }
+    fetch();
+  }, []);
   if (!events || events.length === 0) {
     return (
       <div className="min-h-screen p-6 flex items-center justify-center">
@@ -46,7 +53,6 @@ export default async function EventList() {
       </div>
     );
   }
-
   return (
     <div className="min-h-screen p-6">
       <h1 className="font-medium text-center text-4xl text-white mb-6">

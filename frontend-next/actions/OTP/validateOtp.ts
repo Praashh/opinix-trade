@@ -29,7 +29,7 @@ export const verifySMSOTPAction = async (otp: string, phoneNumber: string) => {
     // Set OTP as verified
     await prisma.oTP.update({
       where: { otpID: phoneNumber, otp },
-      data: { isVerified: true, otp: "" },
+      data: { isVerified: true, }, // TODO: otp: "" fix
     });
 
     return { verified: true, message: "OTP verified successfully" };
