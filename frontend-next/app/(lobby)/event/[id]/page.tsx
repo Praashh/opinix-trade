@@ -1,5 +1,6 @@
 "use client"
-import Event from '@/app/components/Event'
+
+import OrderBook from '@/components/landing/Orderbook';
 import { useParams } from 'next/navigation'
 /*
   TODO: 
@@ -8,9 +9,15 @@ import { useParams } from 'next/navigation'
     3. Add event details like name and all.
 */
 export default function Page() {
-  const router = useParams()
-  console.log(router);
+  const {id} = useParams()
+  console.log(id);
+  const eventId = Array.isArray(id) ? id[id.length - 1] : id;
+
+ 
+  if (!eventId) {
+    return <div>Error: Event ID not found</div>;
+  }
   return <div>
-    <Event/>
+    <OrderBook eventId  = {eventId}/>
   </div>
 }

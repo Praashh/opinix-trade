@@ -240,12 +240,36 @@ export async function processOrder(
     await updateOrderbookAfterBid(orderbook);
 
     WebsocketServer.broadcast(orderbook.eventId, {
-      orderbook,
-    });
+      orderBook: {
+        yes: orderbook.yes.map((order) => ({
+          price: order.price,
+          quantity: order.quantity,
+        })),
+        no: orderBook.no.map((order) => ({
+          price: order.price,
+          quantity: order.quantity,
+        })),
+        topPriceYes: orderbook.topYesPrice,
+        topPriceNo: orderbook.topNoPrice,
+      },
+      
+  });
     await checkAndExecuteQueueOrders(orderbook);
     WebsocketServer.broadcast(orderbook.eventId, {
-      orderbook,
-    });
+      orderBook: {
+        yes: orderbook.yes.map((order) => ({
+          price: order.price,
+          quantity: order.quantity,
+        })),
+        no: orderBook.no.map((order) => ({
+          price: order.price,
+          quantity: order.quantity,
+        })),
+        topPriceYes: orderbook.topYesPrice,
+        topPriceNo: orderbook.topNoPrice,
+      },
+      
+  });
     const allTrades = await prisma.trade.findMany({
       where: {
         eventId: orderbook.eventId,

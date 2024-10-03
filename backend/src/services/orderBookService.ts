@@ -68,6 +68,7 @@ export async function updateOrderBook() {
         topPriceYes: orderBook.topPriceYes,
         topPriceNo: orderBook.topPriceNo,
       },
+     
     });
     console.log("Order books updated successfully.");
   }

@@ -22,8 +22,8 @@ export const setupwebsocket = (server: Server) => {
           console.log(`Client subscribed to event ${parsedMessage.eventId}`);
         }
 
-        const orderbook = await getOrderBookForEvent(parsedMessage.eventId);
-        ws.send(JSON.stringify({ orderbook }));
+         
+        ws.send(JSON.stringify(await getOrderBookForEvent(parsedMessage.eventId)));
       }
     });
 

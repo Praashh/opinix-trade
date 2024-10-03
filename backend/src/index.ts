@@ -18,9 +18,9 @@ app.use("/v1/events", eventRouter);
 
 const server = http.createServer(app);
 export const WebsocketServer = setupwebsocket(server);
-server.listen(3000, () => {
+server.listen(3001, () => {
   console.log(`Server is running on http://localhost:3000`);
 });
-//  setInterval(async () => {
-//    await updateOrderBook();
-//  }, 30000);
+ setInterval(async () => {
+   await updateOrderBook();
+ }, 30000);

@@ -56,23 +56,23 @@ model OrderBook {
 }
 
 model YesOrder {
-  id          String    @id @default(cuid())
+  id          String      @id @default(cuid())
   orderBookId String
   price       Float
   quantity    Int
   status      OrderStatus
-  createdAt   DateTime  @default(now())
-  orderBook   OrderBook @relation(fields: [orderBookId], references: [id])
+  createdAt   DateTime    @default(now())
+  orderBook   OrderBook   @relation(fields: [orderBookId], references: [id])
 }
 
 model NoOrder {
-  id          String    @id @default(cuid())
+  id          String      @id @default(cuid())
   orderBookId String
   price       Float
   quantity    Int
   status      OrderStatus
-  createdAt   DateTime  @default(now())
-  orderBook   OrderBook @relation(fields: [orderBookId], references: [id])
+  createdAt   DateTime    @default(now())
+  orderBook   OrderBook   @relation(fields: [orderBookId], references: [id])
 }
 
 model Trade {
@@ -98,13 +98,14 @@ model Payout {
 }
 
 model OTP {
-  id        String   @id
-  userId    String
-  otp       String   @unique
-  createdAt DateTime @default(now())
-  expiresAt DateTime
-  otpID     String
-  User      User     @relation(fields: [userId], references: [id])
+  id         String   @id @default(uuid())
+  otpID      String   @unique
+  otp        String   @unique
+  createdAt  DateTime @default(now())
+  expiresAt  DateTime
+  isVerified Boolean  @default(false)
+  user       User?    @relation(fields: [userId], references: [id])
+  userId     String?
 }
 
 enum UserRole {
@@ -127,8 +128,8 @@ enum PayoutStatus {
   COMPLETED
   FAILED
 }
+
 enum OrderStatus {
   PENDING
   PLACED
-
 }

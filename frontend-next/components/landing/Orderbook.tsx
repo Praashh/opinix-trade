@@ -12,9 +12,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import LineChart from "../ui/line-chart";
-import axios from "axios";
+
+import { getEventDetails } from "@/actions/Event/getEventDetails";
 
 interface OrderBookItem {
+  id: string;
+  createdAt: Date;
+  orderBookId: string;
   price: number;
   quantity: number;
 }
@@ -22,81 +26,96 @@ interface OrderBookItem {
 interface OrderBookData {
   yes: OrderBookItem[];
   no: OrderBookItem[];
-  topYesPrice: number;
-  topNoPrice: number;
+  topPriceYes: number;
+  topPriceNo: number;
 }
 
 interface WebSocketData {
   orderBook: OrderBookData;
-  probability: {
-    yesProb: number;
-    noProb: number;
-  };
 }
-
-const OrderBook: React.FC = () => {
+interface OrderBookProps {
+  eventId: string;
+}
+const OrderBook: React.FC<OrderBookProps> = ({ eventId }) => {
   const [orderBookData, setOrderBookData] = useState<OrderBookData | null>(
     null
   );
-  const [yesPrice, setYesPrice] = useState<number>(0); 
-  const [noPrice, setNoPrice] = useState<number>(0); 
+  const [yesPrice, setYesPrice] = useState<number>(0);
+  const [noPrice, setNoPrice] = useState<number>(0);
   const [toggle, setToggle] = useState<boolean>(true);
   const [yesProbability, setYesProbability] = useState<number[]>([]);
   const [noProbability, setNoProbability] = useState<number[]>([]);
   const [timeSeries, setTimeSeries] = useState<string[]>([]);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [socket, setSocket] = useState<WebSocket | null>(null);
   const [side, setSide] = useState<"yes" | "no">("yes");
-  const [tradePrice, setTradePrice] = useState<number>(0); 
-  const [tradeQuantity, setTradeQuantity] = useState<number>(1); 
+  const [tradePrice, setTradePrice] = useState<number>(0);
+  const [tradeQuantity, setTradeQuantity] = useState<number>(1);
+  useEffect(() => {
+    async function fetchInitalData() {
+      const eventData = await getEventDetails(eventId);
+      const intialOrderbook = eventData.orderBook;
+      setOrderBookData(intialOrderbook);
+    
+      if (!intialOrderbook?.topPriceYes || !intialOrderbook?.topPriceNo) {
+        console.log("top undefined")
+        return;
+      }
+
+      setYesPrice(intialOrderbook.topPriceYes);
+
+      setNoPrice(intialOrderbook.topPriceNo);
+
+      const yesProb = (intialOrderbook?.topPriceYes / 10) * 100;
+
+      const noProb = (intialOrderbook?.topPriceNo / 10) * 100;
+      setYesProbability([yesProb]);
+      setNoProbability([noProb]);
+    
+    }
+    fetchInitalData();
+  }, [eventId]);
 
   useEffect(() => {
-    const newSocket = new WebSocket("wss://3.234.207.188:3000");
-
-    newSocket.onopen = () => {
+    const ws = new WebSocket("ws://localhost:3001");
+    ws.onopen = () => {
       console.log("Connected to server");
-      setSocket(newSocket);
+      ws.send(JSON.stringify({ eventId }));
     };
-
-    newSocket.onmessage = (event: MessageEvent) => {
+    ws.onmessage = (event: MessageEvent) => {
       const data: WebSocketData = JSON.parse(event.data);
+      console.log("event data" ,data);
       setOrderBookData(data.orderBook);
-      setYesPrice(data.orderBook.topYesPrice);
-      setNoPrice(data.orderBook.topNoPrice);
+      setYesPrice(data.orderBook.topPriceYes);
+      setNoPrice(data.orderBook.topPriceNo);
+      console.log("top" , data.orderBook.topPriceYes)
+      console.log("topno" , data.orderBook.topPriceNo)
+      const newYesProb = (data.orderBook.topPriceYes / 10) * 100;
+      const newNoProb = (data.orderBook.topPriceNo / 10) * 100;
 
-      const yesProbability = data.probability.yesProb;
-      const noProbability = data.probability.noProb;
-
-      setYesProbability((prev) => [...prev, yesProbability]);
-      setNoProbability((prev) => [...prev, noProbability]);
+      setYesProbability((prev) => [...prev, newYesProb]);
+      setNoProbability((prev) => [...prev, newNoProb]);
+     
       setTimeSeries((prev) => [...prev, new Date().toLocaleTimeString()]);
     };
+    ws.onerror = (error) => {
+      console.error("WebSocket error:", error);
+    };
+
+    ws.onclose = () => {
+      console.log("WebSocket connection closed");
+    };
+
+    setSocket(ws);
 
     return () => {
-      newSocket.close();
-      socket?.close();
+      ws.close();
     };
-  }, );
+  }, [eventId]);
 
   const labels = timeSeries;
   const data_yes = yesProbability;
   const data_no = noProbability;
-
-  const handleTrade = async () => {
-    try {
-      const dataToSend = {
-        side,
-        price: tradePrice, 
-        quantity: tradeQuantity, 
-      };
-
-      const response = await axios.post("http://3.234.207.188:3000/v1/order", dataToSend);
-      console.log(response.data);
-
-    } catch (err) {
-      console.error(err);
-    }
-  };
-  
 
   return (
     <div className="container mx-auto p-4">
@@ -122,29 +141,48 @@ const OrderBook: React.FC = () => {
                         </TableHeader>
                         <TableBody>
                           {orderBookData &&
-                            orderBookData.yes
-                              .filter(item => item.price <= orderBookData.topYesPrice)
-                              .sort((a, b) => b.price - a.price) 
-                              .slice(0, 5)
-                              .map((yesItem, index) => {
-                                const noItem = orderBookData.no
-                                  .filter(item => item.price <= orderBookData.topNoPrice)
-                                  .sort((a, b) => b.price - a.price) 
-                                  .slice(0, 5)[index];
+                          orderBookData.yes &&
+                          orderBookData.no ? (
+                            <>
+                              {orderBookData.yes
+                                .filter(
+                                  (item) =>
+                                    item.price >= orderBookData.topPriceYes
+                                )
+                                .sort((a, b) => a.price - b.price)
+                                .slice(0, 5)
+                                .map((yesItem, index) => {
+                                  const noItem = orderBookData.no
+                                    .filter(
+                                      (item) =>
+                                        item.price >= orderBookData.topPriceNo
+                                    )
+                                    .sort((a, b) => a.price - b.price)
+                                    .slice(0, 5)[index];
 
-                                return (
-                                  <TableRow key={index}>
-                                    <TableCell>{yesItem.price}</TableCell>
-                                    <TableCell>{yesItem.quantity}</TableCell>
-                                    {noItem && (
-                                      <>
-                                        <TableCell>{noItem.price}</TableCell>
-                                        <TableCell>{noItem.quantity}</TableCell>
-                                      </>
-                                    )}
-                                  </TableRow>
-                                );
-                              })}
+                                  return (
+                                    <TableRow key={index}>
+                                      <TableCell>{yesItem.price}</TableCell>
+                                      <TableCell>{yesItem.quantity}</TableCell>
+                                      {noItem && (
+                                        <>
+                                          <TableCell>{noItem.price}</TableCell>
+                                          <TableCell>
+                                            {noItem.quantity}
+                                          </TableCell>
+                                        </>
+                                      )}
+                                    </TableRow>
+                                  );
+                                })}
+                            </>
+                          ) : (
+                            <TableRow>
+                              <TableCell colSpan={4}>
+                                Loading order book...
+                              </TableCell>
+                            </TableRow>
+                          )}
                         </TableBody>
                       </Table>
                     </TabsContent>
@@ -184,7 +222,7 @@ const OrderBook: React.FC = () => {
                 <Input
                   type="number"
                   value={tradePrice}
-                  onChange={(e) => setTradePrice(Number(e.target.value))} 
+                  onChange={(e) => setTradePrice(Number(e.target.value))}
                   className="mt-1"
                 />
                 <p className="text-sm text-gray-500">0 qty available</p>
@@ -195,7 +233,7 @@ const OrderBook: React.FC = () => {
                 </label>
                 <Input
                   type="number"
-                  value={tradeQuantity} 
+                  value={tradeQuantity}
                   onChange={(e) => setTradeQuantity(Number(e.target.value))}
                   className="mt-1"
                 />
@@ -213,7 +251,6 @@ const OrderBook: React.FC = () => {
                 </div>
               </div>
               <Button
-                onClick={handleTrade}
                 className={`w-full text-white ${
                   side === "yes"
                     ? "bg-blue-500"

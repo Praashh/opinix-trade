@@ -77,15 +77,33 @@ router.post("/place-order", async (req, res) => {
       })),
     };
 
-    await incomingOrder(userId,side, price, quantity, typedOrderbook);
+    await incomingOrder(userId, side, price, quantity, typedOrderbook);
 
-    return res
-      .status(200)
-      .json({ message: "Order processed successfully"});
+    return res.status(200).json({ message: "Order processed successfully" });
   } catch (e) {
     console.log("Error placing order", e);
     res.status(500).json({ error: "Internal Server Error" });
   }
+});
+
+router.post("/sell-order", async (req, res) => {
+  const { tradeId, eventId, side, quantity, price } = req.body;
+  if (!tradeId || !eventId || !side || !quantity || !price) {
+    return res.status(400).json({ error: "Invalid order data" });
+  }
+  const trade = await prisma.trade.findUnique({
+    where: {
+      id: tradeId,
+    },
+  });
+  if (!trade) {
+    return res.status(400).json({ error: "No trade found" });
+  }
+  await prisma.event.findUnique({
+    where: {
+      id: trade?.eventId,
+    },
+  });
 });
 
 export default router;

@@ -28,9 +28,10 @@ export const getOrderBookForEvent = async (eventId: string) => {
           price: order.price,
           quantity: order.quantity,
         })),
+        topPriceYes: event.orderBook.topPriceYes,
+        topPriceNo: event.orderBook.topPriceNo,
       },
-      topPriceYes: event.orderBook.topPriceYes,
-      topPriceNo: event.orderBook.topPriceNo,
+     
     };
   } catch (error) {
     console.error("Error fetching order book for event:", error);
