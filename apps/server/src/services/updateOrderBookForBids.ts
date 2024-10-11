@@ -32,6 +32,7 @@ export async function updateOrderbookAfterBid(orderbook: OrderbookForOrders) {
         },
       },
     });
+    console.log("updating orderbook")
   } catch (e) {
     console.log("error updating the orderbook", e);
   }

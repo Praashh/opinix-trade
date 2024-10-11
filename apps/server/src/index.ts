@@ -15,11 +15,10 @@ app.use(bodyParser.json());
 app.use("/v1/order", orderRouter);
 app.use("/v1/events", eventRouter);
 
-const server = http.createServer(app);
-export const WebsocketServer = setupwebsocket(server);
-server.listen(3001, () => {
+//export const WebsocketServer = setupwebsocket();
+app.listen(3001, () => {
   console.log(`Server is running on http://localhost:3001`);
 });
- setInterval(async () => {
-   await updateOrderBook();
- }, 30000);
+//  setInterval(async () => {
+//    await updateOrderBook();
+//  }, 30000);

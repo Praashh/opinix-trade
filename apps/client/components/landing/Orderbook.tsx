@@ -87,7 +87,7 @@ export default function OrderBook({ eventId }: OrderBookProps) {
   }, [eventId]);
 
   useEffect(() => {
-    const ws = new WebSocket("ws://localhost:3001");
+    const ws = new WebSocket("ws://localhost:8080");
     ws.onopen = () => {
       ws.send(JSON.stringify({ eventId }));
     };

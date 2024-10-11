@@ -26,13 +26,13 @@ export async function updateOrderBook() {
     orderBook.yes.forEach((order:any) => {
       if (order.price >= orderBook.topPriceYes) {
         const change = Math.floor(Math.random() * 5) - 2;
-        order.quantity = Math.max(0, order.quantity + change);
+        order.quantity = Math.max(2, order.quantity + change);
       }
     });
     orderBook.no.forEach((order:any) => {
       if (order.price >= orderBook.topPriceNo) {
         const change = Math.floor(Math.random() * 5) - 2;
-        order.quantity = Math.max(0, order.quantity + change);
+        order.quantity = Math.max(2, order.quantity + change);
       }
     });
 

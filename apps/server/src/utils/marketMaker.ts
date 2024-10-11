@@ -3,8 +3,7 @@ import { WebsocketServer } from "../router/websockets";
 import { updateOrderbookAfterBid } from "../services/updateOrderBookForBids";
 import prisma from "@repo/db/client";
 
-
-redisClient.connect().then(()=>{
+redisClient.connect().then(() => {
   console.log("Connected to redisclient");
 });
 
@@ -41,7 +40,6 @@ export const initializeOrderBook = (): OrderBook => {
       orderBook.yes.push({
         price,
         quantity: Math.floor(Math.random() * 100) + 1,
-        
       });
       orderBook.no.push({
         price,
@@ -94,6 +92,7 @@ export async function incomingOrder(
   orderbook: OrderbookForOrders
 ) {
   await queuePlacedOrder(userId, side, price, quantity);
+  console.log("after being added to queue");
   await executePlacedOrder(orderbook);
 }
 export async function queuePlacedOrder(
@@ -121,6 +120,7 @@ export async function executePlacedOrder(orderbook: OrderbookForOrders) {
         parsedOrder.quantity
       );
     } else {
+      console.log("order sent to the process");
       await processOrder(
         parsedOrder.userId,
         parsedOrder.side,
@@ -145,6 +145,7 @@ export async function processOrder(
   let opposingTopPrice =
     side == "yes" ? orderbook.topNoPrice : orderbook.topYesPrice;
   let totalfilledQty = 0;
+
   orderBook[side].sort((a, b) => a.price - b.price);
   if (price < topPrice) {
     await queueOrder(userId, side, price, quantity);
@@ -178,7 +179,8 @@ export async function processOrder(
         },
       });
     }
-   const buyPrice = side === 'yes' ? orderbook.topYesPrice : orderbook.topNoPrice
+    const buyPrice =
+      side === "yes" ? orderbook.topYesPrice : orderbook.topNoPrice;
     const tradeSide = side === "yes" ? "YES" : "NO";
     await prisma.trade.create({
       data: {
@@ -231,7 +233,8 @@ export async function processOrder(
             (order) => order.price === price
           );
           if (matchingOrder && matchingOrder.quantity === 0) {
-            matchingOrder.quantity = Math.floor(Math.random() * (50 - 30 + 1)) + 30;
+            matchingOrder.quantity =
+              Math.floor(Math.random() * (50 - 30 + 1)) + 30;
           }
         }
       }
@@ -255,31 +258,16 @@ export async function processOrder(
         topPriceYes: orderbook.topYesPrice,
         topPriceNo: orderbook.topNoPrice,
       },
-      
-  });
+    });
+    console.log("ws broadcast");
     await updateOrderbookAfterBid(orderbook);
 
-   
-    await checkAndExecuteQueueOrders(orderbook);
-    WebsocketServer.broadcast(orderbook.eventId, {
-      orderBook: {
-        yes: orderbook.yes.map((order) => ({
-          price: order.price,
-          quantity: order.quantity,
-        })),
-        no: orderbook.no.map((order) => ({
-          price: order.price,
-          quantity: order.quantity,
-        })),
-        topPriceYes: orderbook.topYesPrice,
-        topPriceNo: orderbook.topNoPrice,
-      },
-      
-  });
+    console.log("after ordervbook yudated");
+
     const allTrades = await prisma.trade.findMany({
       where: {
         eventId: orderbook.eventId,
-        status : 'ACTIVE'
+        status: "ACTIVE",
       },
     });
     for (const trade of allTrades) {

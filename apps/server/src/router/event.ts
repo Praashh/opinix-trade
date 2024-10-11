@@ -2,7 +2,7 @@ import { Router } from "express";
 import { initializeOrderBook } from "../utils/marketMaker";
 import prisma from "@repo/db/client";
 import { WebsocketServer } from "./websockets";
-
+import axios from "axios"
 const router = Router();
 
 router.post("/intialize", async (req, res) => {
@@ -17,7 +17,7 @@ router.post("/intialize", async (req, res) => {
       return res.status(403).json({ message: "No event found" });
     }
     const orderbook = initializeOrderBook();
-    await prisma.orderBook.create({
+    const workerOB =await prisma.orderBook.create({
       data: {
         eventId: event.id,
         topPriceYes: orderbook.topYesPrice,
@@ -37,16 +37,25 @@ router.post("/intialize", async (req, res) => {
             status : 'PLACED'
           })),
         },
-      },
+      },include:{
+        yes : true,
+        no : true
+      }
     });
-    WebsocketServer.broadcast(eventId, {
-      orderbook: {
-        yes: orderbook.yes,
-        no: orderbook.no,
-        topYesPrice: orderbook.topYesPrice,
-        topNoPrice: orderbook.topNoPrice,
-      },
-    });
+    
+
+
+    // WebsocketServer.broadcast(eventId, {
+    //   orderbook: {
+    //     yes: orderbook.yes,
+    //     no: orderbook.no,
+    //     topYesPrice: orderbook.topYesPrice,
+    //     topNoPrice: orderbook.topNoPrice,
+    //   },
+    // });
+    await axios.post("http://localhost:3002/v1/orderbook/initialize-worker",{
+      workerOB
+    })
     return res
       .status(201)
       .json({ message: "Order book initialized successfully" });

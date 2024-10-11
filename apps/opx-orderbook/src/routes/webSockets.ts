@@ -1,11 +1,9 @@
 import WebSocket from "ws";
 
-import { getOrderBookForEvent } from "../services/getOrderBookForEvent";
-
 let clients: { ws: WebSocket; eventId: string }[] = [];
 
-export const setupwebsocket = () => {
-  const wss = new WebSocket.Server({ port : 8080});
+export const setupWebSocket = () => {
+  const wss = new WebSocket.Server({ port: 8080 });
 
   wss.on("connection", (ws: WebSocket) => {
     ws.on("message", async (message: string) => {
@@ -16,14 +14,10 @@ export const setupwebsocket = () => {
           (client) =>
             client.ws === ws && client.eventId === parsedMessage.eventId
         );
-
         if (!existingClient) {
           clients.push({ ws, eventId: parsedMessage.eventId });
           console.log(`Client subscribed to event ${parsedMessage.eventId}`);
         }
-
-         
-        ws.send(JSON.stringify(await getOrderBookForEvent(parsedMessage.eventId)));
       }
     });
 
@@ -32,6 +26,7 @@ export const setupwebsocket = () => {
       console.log("Client disconnected.");
     });
   });
+
   return wss;
 };
 
