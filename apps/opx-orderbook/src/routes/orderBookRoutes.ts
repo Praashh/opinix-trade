@@ -1,14 +1,15 @@
 import { Router } from "express";
-import { intializeOrderbook } from "../services/fakeLiquidity";
+import { intializeOrderbook } from "../services/InitializeOB";
 import { WebsocketServer } from "./webSockets";
+import { startLiquidity } from "../services/fakeLiquidity";
 
 const router = Router();
 
-const inMemoryOrderBooks: { [eventId: string]: any } = {};
+export const inMemoryOrderBooks: { [eventId: string]: any } = {};
 
 router.post("/initialize-worker", async (req, res) => {
   const { workerOB } = req.body;
- 
+
   const eventId = workerOB.eventId;
   if (!eventId || inMemoryOrderBooks[eventId]) {
     return res.json({
@@ -24,12 +25,13 @@ router.post("/initialize-worker", async (req, res) => {
     orderbook: {
       yes: orderBook.yes,
       no: orderBook.no,
-      topYesPrice: orderBook.topYesPrice,
-      topNoPrice: orderBook.topNoPrice,
+      topPriceYes: orderBook.topPriceYes,
+      topPriceNo: orderBook.topPriceNo,
     },
   };
 
   WebsocketServer.broadcast(eventId, broadcastData);
+  startLiquidity(eventId);
   res.status(200).json({ message: "Order book initialized successfully" });
 });
 

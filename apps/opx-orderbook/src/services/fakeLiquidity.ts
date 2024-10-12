@@ -1,35 +1,37 @@
+import { inMemoryOrderBooks } from "../routes/orderBookRoutes";
+import { WebsocketServer } from "../routes/webSockets";
 
-import { orderBook } from "../utils/orderbook";
+export function fakeliquidity(eventId: string) {
+  const orderBook = inMemoryOrderBooks[eventId];
+  if (!orderBook) {
+    return;
+  }
+  orderBook.yes.forEach((order: any) => {
+    if (order.price >= orderBook.topPriceYes) {
+      const change = Math.floor(Math.random() * 5) - 2;
+      order.quantity = Math.max(1, order.quantity + change);
+    }
+  });
+  orderBook.no.forEach((order: any) => {
+    if (order.price >= orderBook.topPriceNo) {
+      const change = Math.floor(Math.random() * 5) - 2;
+      order.quantity = Math.max(1, order.quantity + change);
+    }
+  });
+  const broadcastData = {
+    orderbook: {
+      yes: orderBook.yes,
+      no: orderBook.no,
+      topPriceYes: orderBook.topPriceYes,
+      topPriceNo: orderBook.topPriceNo,
+    },
+  };
 
-export function intializeOrderbook(intitalData: any): orderBook {
-  const {
-    id,
-    eventId,
-    topYesPrice,
-    topNoPrice,
-    yes: yesOrders,
-    no: noOrders,
-  } = intitalData;
+  WebsocketServer.broadcast(eventId, broadcastData);
+}
 
-  const inMemoryOrderBook = new orderBook(id, eventId, topYesPrice, topNoPrice);
-
-  inMemoryOrderBook.yes = yesOrders.map((order: any) => ({
-    id: order.id,
-    orderBookId: inMemoryOrderBook.id,
-    price: order.price,
-    quantity: order.quantity,
-    status: order.status,
-  }));
-
-  inMemoryOrderBook.no = noOrders.map((order: any) => ({
-    id: order.id,
-    orderBookId: inMemoryOrderBook.id,
-    price: order.price,
-    quantity: order.quantity,
-    status: order.status,
-  }));
-
-  console.log(`Order book initialized for event: ${eventId}`);
-
-  return inMemoryOrderBook;
+export function startLiquidity(eventId: string, interval = 20000) {
+  setInterval(() => {
+    fakeliquidity(eventId);
+  }, interval);
 }

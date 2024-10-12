@@ -10,21 +10,21 @@ export interface Order {
 export class orderBook {
   public id: string;
   public eventId: string;
-  public topYesPrice: number;
-  public topNoPrice: number;
+  public topPriceYes: number;
+  public topPriceNo: number;
   public yes: Order[];
   public no: Order[];
 
   constructor(
     id: string,
     eventId: string,
-    topYesPrice: number,
-    topNoPrice: number
+    topPriceYes: number,
+    topPriceNo: number
   ) {
     (this.id = id),
       (this.eventId = eventId),
-      (this.topYesPrice = topYesPrice),
-      (this.topNoPrice = topNoPrice),
+      (this.topPriceYes = topPriceYes),
+      (this.topPriceNo = topPriceNo),
       (this.yes = []),
       (this.no = []);
   }
