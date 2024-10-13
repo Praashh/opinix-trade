@@ -147,148 +147,141 @@ export async function processOrder(
   let totalfilledQty = 0;
 
   orderBook[side].sort((a, b) => a.price - b.price);
-  if (price < topPrice) {
-    await queueOrder(userId, side, price, quantity);
-    return;
-  } else {
-    const user = await prisma.user.findUnique({
-      where: {
-        id: userId,
-      },
-    });
-    const cost = price * quantity;
-    if (user) {
-      if (user?.balance < cost) {
-        throw new Error("Insufficient balance.");
-      }
-      await prisma.user.update({
-        where: { id: userId },
-        data: { balance: user.balance - cost },
-      });
-    }
 
-    let portfolio = await prisma.portfolio.findUnique({
-      where: {
+  const user = await prisma.user.findUnique({
+    where: {
+      id: userId,
+    },
+  });
+  const cost = price * quantity;
+  if (user) {
+    if (user?.balance < cost) {
+      throw new Error("Insufficient balance.");
+    }
+    await prisma.user.update({
+      where: { id: userId },
+      data: { balance: user.balance - cost },
+    });
+  }
+
+  let portfolio = await prisma.portfolio.findUnique({
+    where: {
+      userId: userId,
+    },
+  });
+  if (!portfolio) {
+    portfolio = await prisma.portfolio.create({
+      data: {
         userId: userId,
       },
     });
-    if (!portfolio) {
-      portfolio = await prisma.portfolio.create({
-        data: {
-          userId: userId,
-        },
-      });
+  }
+  const buyPrice =
+    side === "yes" ? orderbook.topYesPrice : orderbook.topNoPrice;
+  const tradeSide = side === "yes" ? "YES" : "NO";
+  await prisma.trade.create({
+    data: {
+      portfolioId: portfolio?.id,
+      eventId: orderbook.eventId,
+      price: Number(buyPrice),
+      quantity: Number(quantity),
+      side: tradeSide,
+    },
+  });
+  let currentTopPrice = topPrice;
+  while (totalfilledQty < quantity && currentTopPrice <= 9.5) {
+    const currentOrders = orderbook[side].filter(
+      (order) => order.price === currentTopPrice
+    );
+    if (currentOrders.length > 0) {
+      for (const order of currentOrders) {
+        if (totalfilledQty < quantity) {
+          const qtyToFill = Math.min(quantity - totalfilledQty, order.quantity);
+          order.quantity -= qtyToFill;
+          totalfilledQty += qtyToFill;
+
+          if (order.quantity === 0) {
+            currentTopPrice += 0.5;
+          }
+        }
+      }
+    } else {
+      currentTopPrice += 0.5;
     }
-    const buyPrice =
+
+    topPrice = currentTopPrice;
+    if (side === "yes") {
+      orderbook.topYesPrice = topPrice;
+      orderbook.topNoPrice = 10 - topPrice;
+    } else {
+      orderbook.topNoPrice = topPrice;
+      orderbook.topYesPrice = 10 - topPrice;
+    }
+    const oldOppTop = opposingTopPrice;
+    const newTopOpposing =
+      side === "yes" ? orderbook.topNoPrice : orderbook.topYesPrice;
+
+    if (newTopOpposing < oldOppTop) {
+      for (let price = oldOppTop; price >= newTopOpposing; price -= 0.5) {
+        const matchingOrder = orderbook[opposingSide].find(
+          (order) => order.price === price
+        );
+        if (matchingOrder && matchingOrder.quantity === 0) {
+          matchingOrder.quantity =
+            Math.floor(Math.random() * (50 - 30 + 1)) + 30;
+        }
+      }
+    }
+
+    console.log(
+      `Updated top prices: ${side} = ${topPrice}, ${opposingSide} = ${
+        10 - topPrice
+      }`
+    );
+  }
+  WebsocketServer.broadcast(orderbook.eventId, {
+    orderBook: {
+      yes: orderbook.yes.map((order) => ({
+        price: order.price,
+        quantity: order.quantity,
+      })),
+      no: orderBook.no.map((order) => ({
+        price: order.price,
+        quantity: order.quantity,
+      })),
+      topPriceYes: orderbook.topYesPrice,
+      topPriceNo: orderbook.topNoPrice,
+    },
+  });
+  console.log("ws broadcast");
+  await updateOrderbookAfterBid(orderbook);
+
+  console.log("after ordervbook yudated");
+
+  const allTrades = await prisma.trade.findMany({
+    where: {
+      eventId: orderbook.eventId,
+      status: "ACTIVE",
+    },
+  });
+  for (const trade of allTrades) {
+    const currentPrice =
       side === "yes" ? orderbook.topYesPrice : orderbook.topNoPrice;
-    const tradeSide = side === "yes" ? "YES" : "NO";
-    await prisma.trade.create({
-      data: {
-        portfolioId: portfolio?.id,
-        eventId: orderbook.eventId,
-        price: Number(buyPrice),
-        quantity: Number(quantity),
-        side: tradeSide,
-      },
-    });
-    let currentTopPrice = topPrice;
-    while (totalfilledQty < quantity && currentTopPrice <= 9.5) {
-      const currentOrders = orderbook[side].filter(
-        (order) => order.price === currentTopPrice
-      );
-      if (currentOrders.length > 0) {
-        for (const order of currentOrders) {
-          if (totalfilledQty < quantity) {
-            const qtyToFill = Math.min(
-              quantity - totalfilledQty,
-              order.quantity
-            );
-            order.quantity -= qtyToFill;
-            totalfilledQty += qtyToFill;
+    const gainloss = (currentPrice - trade.price) * trade.quantity;
 
-            if (order.quantity === 0) {
-              currentTopPrice += 0.5;
-            }
-          }
-        }
-      } else {
-        currentTopPrice += 0.5;
-      }
-
-      topPrice = currentTopPrice;
-      if (side === "yes") {
-        orderbook.topYesPrice = topPrice;
-        orderbook.topNoPrice = 10 - topPrice;
-      } else {
-        orderbook.topNoPrice = topPrice;
-        orderbook.topYesPrice = 10 - topPrice;
-      }
-      const oldOppTop = opposingTopPrice;
-      const newTopOpposing =
-        side === "yes" ? orderbook.topNoPrice : orderbook.topYesPrice;
-
-      if (newTopOpposing < oldOppTop) {
-        for (let price = oldOppTop; price >= newTopOpposing; price -= 0.5) {
-          const matchingOrder = orderbook[opposingSide].find(
-            (order) => order.price === price
-          );
-          if (matchingOrder && matchingOrder.quantity === 0) {
-            matchingOrder.quantity =
-              Math.floor(Math.random() * (50 - 30 + 1)) + 30;
-          }
-        }
-      }
-
-      console.log(
-        `Updated top prices: ${side} = ${topPrice}, ${opposingSide} = ${
-          10 - topPrice
-        }`
-      );
-    }
-    WebsocketServer.broadcast(orderbook.eventId, {
-      orderBook: {
-        yes: orderbook.yes.map((order) => ({
-          price: order.price,
-          quantity: order.quantity,
-        })),
-        no: orderBook.no.map((order) => ({
-          price: order.price,
-          quantity: order.quantity,
-        })),
-        topPriceYes: orderbook.topYesPrice,
-        topPriceNo: orderbook.topNoPrice,
-      },
-    });
-    console.log("ws broadcast");
-    await updateOrderbookAfterBid(orderbook);
-
-    console.log("after ordervbook yudated");
-
-    const allTrades = await prisma.trade.findMany({
+    await prisma.portfolio.update({
       where: {
-        eventId: orderbook.eventId,
-        status: "ACTIVE",
+        id: trade.portfolioId,
+      },
+      data: {
+        currentBalances: {
+          increment: gainloss,
+        },
       },
     });
-    for (const trade of allTrades) {
-      const currentPrice =
-        side === "yes" ? orderbook.topYesPrice : orderbook.topNoPrice;
-      const gainloss = (currentPrice - trade.price) * trade.quantity;
-
-      await prisma.portfolio.update({
-        where: {
-          id: trade.portfolioId,
-        },
-        data: {
-          currentBalances: {
-            increment: gainloss,
-          },
-        },
-      });
-    }
   }
 }
-async function queueOrder(
+async function  queueOrder(
   userId: string,
   side: "yes" | "no",
   price: number,
