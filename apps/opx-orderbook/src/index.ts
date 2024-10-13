@@ -4,6 +4,7 @@ import cors from "cors";
 import bodyParser from "body-parser";
 import orderRouter from "./routes/orderBookRoutes";
 import { setupWebSocket } from "./routes/webSockets";
+import { startWorker } from "./services/initializeWorker";
 
 const app = express();
 
@@ -17,6 +18,7 @@ app.get("/", (req, res) => {
   });
   
 });
+startWorker()
 const wss = setupWebSocket();
 app.listen(3002, () => {
   console.log(`Server_2 is running at http://localhost:3002`);

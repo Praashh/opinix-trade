@@ -4,6 +4,7 @@ import { WebsocketServer } from "./webSockets";
 import { startLiquidity } from "../services/fakeLiquidity";
 import { redisClient } from "@repo/order-queue";
 import { placeOrder } from "../services/placeOrder";
+import { sellOrder } from "../services/sellOrder";
 
 const router = Router();
 
@@ -33,7 +34,7 @@ router.post("/initialize-worker", async (req, res) => {
   };
 
   WebsocketServer.broadcast(eventId, broadcastData);
- // startLiquidity(eventId);
+  // startLiquidity(eventId);
   res.status(200).json({ message: "Order book initialized successfully" });
 });
 
@@ -53,6 +54,28 @@ router.post("/place-order", async (req, res) => {
     return res
       .status(500)
       .json({ message: "Error placing order", error: error.message });
+  }
+});
+
+router.post("/sell-order", async (req, res) => {
+  const { eventId, side, quantity, price } = req.body;
+  if (!eventId || !side || !quantity || !price) {
+    return res.status(401).json({ message: "Invalid information" });
+  }
+
+  try {
+    const result = await sellOrder(eventId, side, quantity, price);
+
+    if (result.success) {
+      return res.status(200).json({ success: true, message: result.message });
+    } else {
+      return res.status(400).json({ success: false, message: result.message });
+    }
+  } catch (error) {
+    console.error(error);
+    return res
+      .status(500)
+      .json({ message: "An error occurred during order processing." });
   }
 });
 

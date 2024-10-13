@@ -1,4 +1,5 @@
 import WebSocket from "ws";
+import { inMemoryOrderBooks } from "./orderBookRoutes";
 
 let clients: { ws: WebSocket; eventId: string }[] = [];
 
@@ -18,6 +19,19 @@ export const setupWebSocket = () => {
           clients.push({ ws, eventId: parsedMessage.eventId });
           console.log(`Client subscribed to event ${parsedMessage.eventId}`);
         }
+        const orderBook = inMemoryOrderBooks[parsedMessage.eventId];
+        if (!orderBook) {
+          ws.send("null");
+        }
+        const broadcastData = {
+          orderbook: {
+            yes: orderBook.yes,
+            no: orderBook.no,
+            topPriceYes: orderBook.topPriceYes,
+            topPriceNo: orderBook.topPriceNo,
+          },
+        };
+        ws.send(JSON.stringify(broadcastData));
       }
     });
 
