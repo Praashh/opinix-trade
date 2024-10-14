@@ -27,7 +27,7 @@ export function intializeOrderbook(intitalData: any): orderBook {
     quantity: order.quantity,
     status: order.status,
   }));
-  console.log(inMemoryOrderBook);
+  
   console.log(`Order book initialized for event: ${eventId}`);
 
   return inMemoryOrderBook;

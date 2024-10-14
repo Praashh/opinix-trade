@@ -1,5 +1,6 @@
 import prisma from "@repo/db/client";
 import { inMemoryOrderBooks } from "../routes/orderBookRoutes";
+import { startLiquidity } from "./fakeLiquidity";
 
 export async function startWorker() {
   const activeEvents = await prisma.event.findMany({
@@ -27,7 +28,8 @@ export async function startWorker() {
         no: event.orderBook.no,
       };
     }
+   startLiquidity(event.id);
   });
-  console.log(inMemoryOrderBooks);
+
   console.log("All active orderbooks reinitialized from database.");
 }
