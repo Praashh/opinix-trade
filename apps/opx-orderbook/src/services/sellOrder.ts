@@ -44,7 +44,7 @@ export async function sellOrder(
           },
         });
       }
-      const gainLoss = 10 * quantity - (price + order.price) * quantity;
+      const gainLoss = price * quantity - order.price * quantity;
       await prisma.trade.update({
         where: {
           id: tradeId,
@@ -83,7 +83,9 @@ export async function sellOrder(
           id: trade?.portfolio.userId,
         },
         data: {
-          balance: order.price * quantity,
+          balance: {
+            increment: gainLoss + quantity * price,
+          },
         },
       });
 
