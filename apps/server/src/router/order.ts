@@ -6,7 +6,6 @@ import {
   OrderbookForOrders,
   OrderStatus,
 } from "../utils/marketMaker";
-import { sellOrder } from "../utils/sellOrder";
 
 const router = Router();
 
@@ -122,7 +121,7 @@ router.post("/sell-order", async (req, res) => {
       side,
       price,
       quantity,
-      tradeId
+      tradeId,
     }
   );
 
