@@ -1,5 +1,5 @@
-"use server"
-import prisma from "@repo/db/client"
+"use server";
+import prisma from "@repo/db/client";
 
 export async function getEventDetails(eventId: string) {
   try {
@@ -7,22 +7,12 @@ export async function getEventDetails(eventId: string) {
       where: {
         id: eventId,
       },
-      include: {
-        orderBook: {
-          include: {
-            yes: true,
-            no: true,
-    
-          },
-        },
-      },
     });
-   
+
     if (!event) {
       throw new Error("Event not found");
     }
-    
-  
+
     return event;
   } catch (error) {
     console.error("Error fetching event details:", error);

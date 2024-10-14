@@ -1,3 +1,4 @@
+import axios from "axios";
 import { Router } from "express";
 import prisma from "@repo/db/client";
 import {
@@ -103,7 +104,7 @@ router.post("/sell-order", async (req, res) => {
   if (!trade) {
     return res.status(400).json({ error: "No trade found" });
   }
-  if(trade.status != 'ACTIVE'){
+  if (trade.status != "ACTIVE") {
     return res.status(400).json({ error: "Trade is already been settled" });
   }
   if (trade.event.status !== "ONGOING") {
@@ -114,44 +115,18 @@ router.post("/sell-order", async (req, res) => {
       error: "Trade price or quantity does not match the stored trade data",
     });
   }
-  const orderbook = await prisma.event.findUnique({
-    where: {
-      id: trade.eventId,
-    },
-    include: {
-      orderBook: {
-        include: {
-          yes: true,
-          no: true,
-        },
-      },
-      
-    },
-  });
-  if (!orderbook?.orderBook) {
-    return res
-      .status(400)
-      .json({ error: "Order book not found for this event" });
-  }
- if(!orderbook.orderBook.topPriceNo || !orderbook.orderBook.topPriceYes){
-  return
- }
- const { topPriceYes, topPriceNo } = orderbook.orderBook;
-  const sellResult = await sellOrder(
-    tradeId,
-    eventId,
-    side,
-    quantity,
-    price,
-    orderbook.orderBook,
-    topPriceYes, 
-    topPriceNo
+  const result = await axios.post(
+    "http://localhost:3002/v1/orderbook/sell-order",
+    {
+      eventId,
+      side,
+      price,
+      quantity,
+      tradeId
+    }
   );
-  
-if(!sellResult.success){
-  return res.json({ message: "Order can't be processed at the moment" });
-}
-return res.json({ message: "Order processed successfully" });
+
+  return res.json({ message: "Order processed successfully" });
 });
 
 export default router;

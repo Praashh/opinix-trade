@@ -26,6 +26,7 @@ export async function placeOrder(
       id: userId,
     },
   });
+  console.log("user check")
   const cost = price * quantity;
   if (user) {
     if (user?.balance < cost) {
@@ -49,6 +50,7 @@ export async function placeOrder(
       },
     });
   }
+  console.log("portfolio creation/update")
   const buyPrice =
     side === "yes" ? orderBook.topPriceYes : orderBook.topPriceNo;
   const tradeSide = side === "yes" ? "YES" : "NO";
@@ -136,7 +138,7 @@ export async function placeOrder(
     const currentPrice =
       side === "yes" ? orderBook.topPriceYes : orderBook.topPriceNo;
     const gainloss = (currentPrice - trade.price) * trade.quantity;
-
+    console.log("finding associate trades");
     await prisma.portfolio.update({
       where: {
         id: trade.portfolioId,
@@ -147,5 +149,6 @@ export async function placeOrder(
         },
       },
     });
+    console.log("updating portfolio balance");
   }
 }

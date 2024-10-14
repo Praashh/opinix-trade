@@ -58,13 +58,13 @@ router.post("/place-order", async (req, res) => {
 });
 
 router.post("/sell-order", async (req, res) => {
-  const { eventId, side, quantity, price } = req.body;
-  if (!eventId || !side || !quantity || !price) {
+  const { eventId, side, quantity, price , tradeId } = req.body;
+  if (!eventId || !side || !quantity || !price  || !tradeId) {
     return res.status(401).json({ message: "Invalid information" });
   }
 
   try {
-    const result = await sellOrder(eventId, side, quantity, price);
+    const result = await sellOrder(eventId, side, quantity, price , tradeId);
 
     if (result.success) {
       return res.status(200).json({ success: true, message: result.message });

@@ -29,7 +29,6 @@ export function fakeliquidity(eventId: string) {
 
   WebsocketServer.broadcast(eventId, broadcastData);
 }
-
 export function startLiquidity(eventId: string, interval = 20000) {
   setInterval(() => {
     fakeliquidity(eventId);

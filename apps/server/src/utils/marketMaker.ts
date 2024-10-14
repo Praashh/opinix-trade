@@ -1,3 +1,4 @@
+import axios from "axios";
 import { redisClient } from "@repo/order-queue";
 import { WebsocketServer } from "../router/websockets";
 import { updateOrderbookAfterBid } from "../services/updateOrderBookForBids";
@@ -121,13 +122,20 @@ export async function executePlacedOrder(orderbook: OrderbookForOrders) {
       );
     } else {
       console.log("order sent to the process");
-      await processOrder(
-        parsedOrder.userId,
-        parsedOrder.side,
-        parsedOrder.price,
-        parsedOrder.quantity,
-        orderbook
-      );
+      // await processOrder(
+      //   parsedOrder.userId,
+      //   parsedOrder.side,
+      //   parsedOrder.price,
+      //   parsedOrder.quantity,
+      //   orderbook
+      // );
+      await axios.post("http://localhost:3002/v1/orderbook/place-order", {
+        userId: parsedOrder.userId,
+        side: parsedOrder.side,
+        price: parsedOrder.price,
+        quantity: parsedOrder.quantity,
+        eventId: orderbook.eventId,
+      });
     }
     order = await redisClient.rPop("placedOrderQueue");
   }
@@ -281,7 +289,7 @@ export async function processOrder(
     });
   }
 }
-async function  queueOrder(
+async function queueOrder(
   userId: string,
   side: "yes" | "no",
   price: number,

@@ -36,7 +36,7 @@ export async function snapshot() {
         },
       });
       console.log(`Successfully saved order book for event ${eventId}`);
-      console.log(orderBook);
+    
     } catch (e) {
       console.log("failed to save the orderbook", e);
     }

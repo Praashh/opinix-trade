@@ -6,7 +6,8 @@ export async function sellOrder(
   eventId: string,
   side: string,
   quantity: number,
-  price: number
+  price: number,
+  tradeId: string
 ) {
   const orderBook = inMemoryOrderBooks[eventId];
   if (!orderBook) {
@@ -14,7 +15,7 @@ export async function sellOrder(
   }
   const oppositeSide = side === "yes" ? "no" : "yes";
   const oppositeOrder = orderBook[oppositeSide];
-  oppositeOrder.sort((a : any, b : any) => a.price - b.price);
+  oppositeOrder.sort((a: any, b: any) => a.price - b.price);
 
   for (let order of oppositeOrder) {
     if (order.quantity >= quantity) {
@@ -43,18 +44,18 @@ export async function sellOrder(
           },
         });
       }
-    //  const gainLoss = 10 * quantity - (price + order.price) * quantity;
-    //   await prisma.trade.update({
-    //     where: {
-    //       id: tradeId,
-    //     },
-    //     data: {
-    //       status: "PAST",
-    //       gainloss: gainLoss,
-    //     },
-    //   });
+      const gainLoss = 10 * quantity - (price + order.price) * quantity;
+      await prisma.trade.update({
+        where: {
+          id: tradeId,
+        },
+        data: {
+          status: "PAST",
+          gainloss: gainLoss,
+        },
+      });
 
-    const broadcastData = {
+      const broadcastData = {
         orderbook: {
           yes: orderBook.yes,
           no: orderBook.no,
@@ -62,29 +63,29 @@ export async function sellOrder(
           topPriceNo: orderBook.topPriceNo,
         },
       };
-    
+
       WebsocketServer.broadcast(eventId, broadcastData);
 
-    //   const trade = await prisma.trade.findUnique({
-    //     where: {
-    //       id: tradeId,
-    //     },
-    //     include: {
-    //       portfolio: {
-    //         include: {
-    //           user: true,
-    //         },
-    //       },
-    //     },
-    //   });
-    //   await prisma.user.update({
-    //     where: {
-    //       id: trade?.portfolio.userId,
-    //     },
-    //     data: {
-    //       balance: order.price * quantity,
-    //     },
-    //   });
+      const trade = await prisma.trade.findUnique({
+        where: {
+          id: tradeId,
+        },
+        include: {
+          portfolio: {
+            include: {
+              user: true,
+            },
+          },
+        },
+      });
+      await prisma.user.update({
+        where: {
+          id: trade?.portfolio.userId,
+        },
+        data: {
+          balance: order.price * quantity,
+        },
+      });
 
       return { success: true, message: "Order executed successfully." };
     }

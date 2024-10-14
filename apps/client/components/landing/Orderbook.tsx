@@ -18,9 +18,7 @@ import { ArrowUpDown } from "lucide-react";
 
 import { useSession } from "next-auth/react";
 
-import {toast, Toaster} from "react-hot-toast"
-
-
+import { toast, Toaster } from "react-hot-toast";
 
 interface OrderBookItem {
   id: string;
@@ -38,7 +36,9 @@ interface OrderBookData {
 }
 
 interface WebSocketData {
-  orderBook: OrderBookData;
+  orderbook: OrderBookData;
+  topPriceYes: number;
+  topPriceNo: number;
 }
 
 interface OrderBookProps {
@@ -46,7 +46,7 @@ interface OrderBookProps {
 }
 
 export default function OrderBook({ eventId }: OrderBookProps) {
-  const {data} = useSession();
+  const { data } = useSession();
   const [orderBookData, setOrderBookData] = useState<OrderBookData | null>(
     null
   );
@@ -69,21 +69,8 @@ export default function OrderBook({ eventId }: OrderBookProps) {
       const eventData = await getEventDetails(eventId);
       setTitle(eventData.title);
       setDescription(eventData.description);
-      const initialOrderbook = eventData.orderBook;
-      setOrderBookData(initialOrderbook);
-
-      if (initialOrderbook?.topPriceYes && initialOrderbook?.topPriceNo) {
-        setYesPrice(initialOrderbook.topPriceYes);
-        setNoPrice(initialOrderbook.topPriceNo);
-        const yesProb = (initialOrderbook.topPriceYes / 10) * 100;
-        const noProb = (initialOrderbook.topPriceNo / 10) * 100;
-        setYesProbability([yesProb]);
-        setNoProbability([noProb]);
-        setTimeSeries([new Date().toLocaleTimeString()]);
-      }
     }
     fetchInitialData();
-    
   }, [eventId]);
 
   useEffect(() => {
@@ -93,11 +80,11 @@ export default function OrderBook({ eventId }: OrderBookProps) {
     };
     ws.onmessage = (event: MessageEvent) => {
       const data: WebSocketData = JSON.parse(event.data);
-      setOrderBookData(data.orderBook);
-      setYesPrice(data.orderBook.topPriceYes);
-      setNoPrice(data.orderBook.topPriceNo);
-      const newYesProb = (data.orderBook.topPriceYes / 10) * 100;
-      const newNoProb = (data.orderBook.topPriceNo / 10) * 100;
+      setOrderBookData(data.orderbook);
+      setYesPrice(data.orderbook.topPriceYes);
+      setNoPrice(data.orderbook.topPriceNo);
+      const newYesProb = (data.orderbook.topPriceYes / 10) * 100;
+      const newNoProb = (data.orderbook.topPriceNo / 10) * 100;
       setYesProbability((prev) => [...prev, newYesProb]);
       setNoProbability((prev) => [...prev, newNoProb]);
       setTimeSeries((prev) => [...prev, new Date().toLocaleTimeString()]);
@@ -116,16 +103,16 @@ export default function OrderBook({ eventId }: OrderBookProps) {
       `${process.env.NEXT_PUBLIC_API_PREFIX_URL}/v1/order/place-order`,
       {
         userId: data?.user.id,
-        eventId : eventId,
+        eventId: eventId,
         side: side,
         quantity: tradeQuantity,
         price: tradePrice,
       }
     );
-    if(response.status === 200){
-      toast.success("Order placed successfully!")
-    }else{
-      toast.error("Error placing order!")
+    if (response.status === 200) {
+      toast.success("Order placed successfully!");
+    } else {
+      toast.error("Error placing order!");
     }
   }
 
@@ -353,7 +340,7 @@ export default function OrderBook({ eventId }: OrderBookProps) {
           <p className="text-gray-300">{description}</p>
         </CardContent>
       </Card>
-      <Toaster position="top-center"/>
+      <Toaster position="top-center" />
     </div>
   );
 }
